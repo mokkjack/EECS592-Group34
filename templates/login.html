@@ -17,14 +17,13 @@
       <div class="brand">Enclav3</div>
       <div class="subtitle">Enter your master password</div>
 
-      <form class="form">
+      <form class="form" method="POST" action="/">
         <div class="form__field">
-          <input type="password" placeholder="Master password" required />
+          <input type="password" name="master_password" placeholder="Master password" required />
         </div>
 
         <div class="form__field">
-          <!--<input type="submit" value="Unlock" />-->
-          <a href="/main">Login</a>
+          <input type="submit" value="Unlock" />
         </div>
       </form>
 
