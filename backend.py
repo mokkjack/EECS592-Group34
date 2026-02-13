@@ -15,6 +15,12 @@ from cryptography.fernet import Fernet, InvalidToken
 DEFAULT_DB = os.path.join(os.path.dirname(__file__), "passwords.db")
 PBKDF2_ITERATIONS = 200_000
 
+DB_TEIRS = {
+	"low": "passwords_low.db",
+	"medium": "passwords_medium.db",
+	"high": "passwords_high.db",
+}
+DEFAULT_TIER = "low"
 
 @dataclass
 class Entry:
@@ -45,7 +51,7 @@ def _get_connection(db_path: str) -> sqlite3.Connection:
 	return conn
 
 
-def init_db(db_path: str, master_password: str) -> None:
+def init_db(db_path: str, master_password: str, tier: str = DEFAULT_TIER) -> None:
 	if os.path.exists(db_path):
 		raise RuntimeError("Database already exists.")
 
@@ -273,6 +279,12 @@ def _prompt_master_password(confirm: bool = False) -> str:
 def build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(description="Simple local password manager")
 	parser.add_argument("--db", default=DEFAULT_DB, help="Path to the SQLite database")
+	parser.add_argument(
+		"--tier",
+		choices=list(DB_TEIRS.keys()),
+		default=DEFAULT_TIER,
+		help="Select a tiered database (overridden by explicit --db)",
+	)
 
 	sub = parser.add_subparsers(dest="command", required=True)
 
@@ -314,10 +326,18 @@ def main() -> None:
 	parser = build_parser()
 	args = parser.parse_args()
 
+	def _get_db_for_tier(tier: str) -> str:
+		return os.path.join(os.path.dirname(__file__), DB_TEIRS[tier])
+
+	if getattr(args, "db", None) and args.db != DEFAULT_DB:
+		db_path = args.db
+	else:
+		db_path = _get_db_for_tier(getattr(args, "tier", DEFAULT_TIER))
+
 	if args.command == "init":
 		master_password = _prompt_master_password(confirm=True)
-		init_db(args.db, master_password)
-		print(f"Initialized database at {args.db}")
+		init_db(db_path, master_password)
+		print(f"Initialized database at {db_path}")
 		return
 
 	master_password = _prompt_master_password()
@@ -325,25 +345,25 @@ def main() -> None:
 	if args.command == "add":
 		password = args.password or getpass.getpass("Password: ")
 		entry = Entry(site=args.site, username=args.username, password=password, notes=args.notes)
-		add_entry(args.db, master_password, entry)
+		add_entry(db_path, master_password, entry)
 		print("Entry added.")
 		return
 
 	if args.command == "list":
-		list_entries(args.db, master_password)
+		list_entries(db_path, master_password)
 		return
 
 	if args.command == "get":
-		get_entry(args.db, master_password, entry_id=args.id, site=args.site)
+		get_entry(db_path, master_password, entry_id=args.id, site=args.site)
 		return
 
 	if args.command == "delete":
-		delete_entry(args.db, master_password, args.id)
+		delete_entry(db_path, master_password, args.id)
 		return
 
 	if args.command == "update":
 		update_entry(
-			args.db,
+			db_path,
 			master_password,
 			args.id,
 			args.site,
