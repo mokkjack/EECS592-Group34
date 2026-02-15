@@ -32,7 +32,12 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                 <div class="password_card">
                                     <div class="card_header">
                                         <h3>{{ entry.site }}</h3>
-                                        <span class="card_date">{{ entry.created_at }}</span>
+                                        <div class="card_actions">
+                                            <span class="card_date">{{ entry.created_at }}</span>
+                                            <form class="delete_form" method="POST" action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+                                                <button type="submit" class="delete_button" title="Delete" onclick="return confirm('Delete this entry?')">🗑️</button>
+                                            </form>
+                                        </div>
                                     </div>
 
                                     <div class="card_body">
