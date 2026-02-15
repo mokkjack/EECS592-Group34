@@ -1,6 +1,6 @@
 # ENCLAV3
 
-A Multitierd password manager and data vault
+A Multitiered password manager and data vault
 
 ## Description
 
