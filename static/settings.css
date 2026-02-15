@@ -1,0 +1,36 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Helvetica Neue", sans-serif;
+  background-color: #354152;
+  color: #7e8ba3;
+}
+
+/* For the Enclav3 Settings text at the top of the page */
+.brand {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* For the Back to Main buton in settings*/
+.main{
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  outline: none;
+  font-size: 14px;
+}
+
+/* Helper text for Sizing */
+p {
+  font-size: 13px;
+  margin-top: 1.5rem;
+}

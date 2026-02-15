@@ -104,7 +104,7 @@ html, body {
 .form_right {
   flex: 1;
 }
-.logout {
+.logout, .settings {
   width: 100%;
   padding: 0.6rem 1rem;
   border-radius: 999px;
@@ -119,6 +119,11 @@ html, body {
 .logout:hover {
   opacity: 0.9;
 }
+
+.settings:hover {
+  opacity: 0.9;
+}
+
 /* password cards */
 .password_cards {
   display: flex;

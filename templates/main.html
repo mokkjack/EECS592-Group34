@@ -1,6 +1,6 @@
 <!--
 Name: main.html
-Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
+Authors: Jack Morice, Nick Grieco, Alex Carrillo, Gunther Luechtefield
 Description: This file contains the HTML template for the main page of the Enclav3 application. 
 It defines the structure and layout of the page, including the display of password entries and the form for adding new entries. 
 The template uses Jinja2 syntax to dynamically render password entries from the database and to display flash messages for user feedback.
@@ -32,16 +32,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                 <div class="password_card">
                                     <div class="card_header">
                                         <h3>{{ entry.site }}</h3>
-<<<<<<< HEAD
-                                        <div class="card_actions">
-                                            <span class="card_date">{{ entry.created_at }}</span>
-                                            <form class="delete_form" method="POST" action="{{ url_for('delete_entry', entry_id=entry.id) }}">
-                                                <button type="submit" class="delete_button" title="Delete" onclick="return confirm('Delete this entry?')">🗑️</button>
-                                            </form>
-                                        </div>
-=======
                                         <span class="card_date">{{ entry.created_at }}</span>
->>>>>>> 7f4b1f882a1ea9a7c94863dde695cbfab9fb29c7
                                     </div>
 
                                     <div class="card_body">
@@ -92,17 +83,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         <div class="title">Choose a Password Tier</div>
 
                         <div class="radio_option">
-<<<<<<< HEAD
-                            <input type="radio" id="tier1" name="option" value="low" checked>
-                            <label for ="tier1">Tier 1</label>
-                        </div>
-                        <div class="radio_option">
-                            <input type="radio" id="tier2" name="option" value="medium">
-                            <label for ="tier2">Tier 2</label>
-                        </div>
-                        <div class="radio_option">
-                            <input type="radio" id="tier3" name="option" value="high">
-=======
                             <input type="radio" id="tier1" name="option" value=1> 
                             <label for ="tier1">Tier 1</label>
                         </div>
@@ -112,7 +92,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         </div>
                         <div class="radio_option">
                             <input type="radio" id="tier3" name="option" value=3> 
->>>>>>> 7f4b1f882a1ea9a7c94863dde695cbfab9fb29c7
                             <label for ="tier3">Tier 3</label>
                         </div>
                     </div>      
@@ -123,6 +102,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
             </form>
 
             <a href="/logout" class="logout">Logout</a>
+            <a href="/settings" class="settings">Settings</a>
         </div>
     </div>
 

@@ -118,19 +118,11 @@ def logout(): #Logout handler
     session.pop("master_password", None)
     return redirect(url_for("login"))
 
-
-def _run_flask_server() -> None: #Create a function to run the Flask server
-    server = make_server("127.0.0.1", 5000, app)
-    server.serve_forever()
-
-
-def _run_desktop() -> None: #Create a function to run the desktop application using pywebview
-    flask_thread = threading.Thread(target=_run_flask_server, daemon=True)
-    flask_thread.start()
-    time.sleep(0.5)
-    webview.create_window("Enclav3", "http://127.0.0.1:5000", width=1100, height=700)
-    webview.start()
-
+@app.route("/settings")
+def settings():
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    return render_template("settings.html")
 
 if __name__ == "__main__":
     _run_desktop()
