@@ -1,82 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Enclav3 — Passwords</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+
 
 <body>
-  <div class="grid wide">
-    <div class="register left">
+    <div class="grid">
+        <div class="register">
+            <div class="brand">Enclav3</div>
+            <div class="subtitle">Your passwords</div>
 
-      <div class="header-row">
-        <div>
-          <div class="brand">Enclav3</div>
-          <div class="subtitle">Your passwords</div>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="success">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+                        {% if entries %}
+                        <div class="password_cards">
+                            {% for entry in entries %}
+                                <div class="password_card">
+                                    <div class="card_header">
+                                        <h3>{{ entry.site }}</h3>
+                                        <span class="card_date">{{ entry.created_at }}</span>
+                                    </div>
+
+                                    <div class="card_body">
+                                        <p><strong>Username:</strong> {{ entry.username }}</p>
+                                        <p>
+                                            <strong>Password:</strong> 
+                                            <span class="password_text">••••••••</span>
+                                            <span class="real_password" style="display:none;">{{ entry.password }}</span>
+                                            <button type="button" class="toggle_password">Show</button>
+                                        </p>
+
+                                        {% if entry.notes %}
+                                            <p><strong>Notes:</strong> {{ entry.notes }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="subtitle">No passwords yet. Add your first one below.</div>
+                    {% endif %}
+
+
+                        <form class="form" method="POST" action="/add-entry">
+                            
+                <div class="form_layout">
+                    <!-- left side of box -->
+                    <div class="form_left">
+                        <div class="title">Add a Password</div>
+                        <div class="form__field" >
+                            <input type="text" name="site" autocomplete="off" autocapitalize="on" placeholder="Site" required />
+                        </div>
+                        <div class="form__field" >
+                            <input type="text" name="username" autocomplete="off" placeholder="Username" required />
+                        </div>
+                        <div class="form__field" >
+                            <input type="password" name="password" autocomplete="off" placeholder="Password" required />
+                        </div>
+                        
+                        <div class="form__field" >
+                            <input type="text" name="notes" autocomplete="off" placeholder="Notes (optional)" />
+                        </div>
+                    </div>
+
+                    <!-- right side of box -->
+                    <div class="form_right"> 
+                        <div class="title">Choose a Password Tier</div>
+
+                        <div class="radio_option">
+                            <input type="radio" id="tier1" name="option" value=1> 
+                            <label for ="tier1">Tier 1</label>
+                        </div>
+                        <div class="radio_option">
+                            <input type="radio" id="tier2" name="option" value=2> 
+                            <label for ="tier2">Tier 2</label>
+                        </div>
+                        <div class="radio_option">
+                            <input type="radio" id="tier3" name="option" value=3> 
+                            <label for ="tier3">Tier 3</label>
+                        </div>
+                    </div>      
+                </div>
+                <div class="form__field">
+                    <input type="submit" value="Add Password" />
+                </div>
+            </form>
+
+            <a href="/logout" class="logout">Logout</a>
         </div>
-        <a class="logout-link" href="/logout">Logout</a>
-      </div>
-
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            <div class="success">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      {% if entries %}
-        <table class="passwords">
-          <thead>
-            <tr>
-              <th>Site</th>
-              <th>Username</th>
-              <th>Password</th>
-              <th>Notes</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% for entry in entries %}
-              <tr>
-                <td>{{ entry.site }}</td>
-                <td>{{ entry.username }}</td>
-                <td>{{ entry.password }}</td>
-                <td class="wrap">{{ entry.notes }}</td>
-                <td class="wrap">{{ entry.created_at }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <div class="subtitle">No passwords yet. Add your first one below.</div>
-      {% endif %}
-
-      <div class="section-title">Add a password</div>
-
-      <form class="form" method="POST" action="/add-entry">
-        <div class="form__field">
-          <input type="text" name="site" placeholder="Site" required />
-        </div>
-        <div class="form__field">
-          <input type="text" name="username" placeholder="Username" required />
-        </div>
-        <div class="form__field">
-          <input type="password" name="password" placeholder="Password" required />
-        </div>
-        <div class="form__field">
-          <input type="text" name="notes" placeholder="Notes (optional)" />
-        </div>
-        <div class="form__field">
-          <input type="submit" value="Add Password" />
-        </div>
-      </form>
-
     </div>
-  </div>
+
+<script>
+document.querySelectorAll(".toggle_password").forEach(button => {
+    button.addEventListener("click", function() {
+        const card = this.closest(".card_body");
+        const hidden = card.querySelector(".password_text");
+        const real = card.querySelector(".real_password");
+
+        if (real.style.display === "none") {
+            real.style.display = "inline";
+            hidden.style.display = "none";
+            this.textContent = "Hide";
+        } else {
+            real.style.display = "none";
+            hidden.style.display = "inline";
+            this.textContent = "Show";
+        }
+    });
+});
+</script>
 </body>
+
+
 </html>

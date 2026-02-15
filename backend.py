@@ -31,7 +31,8 @@ class Entry:
 
 
 def _utc_now() -> str:
-	return datetime.now(timezone.utc).isoformat()
+	t = datetime.now(timezone.utc).isoformat()
+	return f"{t[5:7]}/{t[8:10]}/{t[0:4]} {t[11:16]}UTC"
 
 
 def _derive_key(master_password: str, salt: bytes, iterations: int) -> bytes:

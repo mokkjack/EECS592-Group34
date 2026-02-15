@@ -68,6 +68,7 @@ def add_entry():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
     notes = request.form.get("notes", "").strip() or None
+    tier = request.form.get("option", "").strip() or 1 # use 'tier' for selecting what database
 
     if not site or not username or not password:
         flash("Site, username, and password are required.")
