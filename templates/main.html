@@ -1,73 +1,82 @@
 <!DOCTYPE html>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Enclav3 — Passwords</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
 
 <body>
-    <div class="grid">
-        <div class="register">
-            <div class="brand">Enclav3</div>
-            <div class="subtitle">Your passwords</div>
+  <div class="grid wide">
+    <div class="register left">
 
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                {% for message in messages %}
-                  <div class="success">{{ message }}</div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-                        {% if entries %}
-                            <table class="passwords">
-                                <thead>
-                                    <tr>
-                                        <th>Site</th>
-                                        <th>Username</th>
-                                        <th>Password</th>
-                                        <th>Notes</th>
-                                        <th>Created</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for entry in entries %}
-                                        <tr>
-                                            <td>{{ entry.site }}</td>
-                                            <td>{{ entry.username }}</td>
-                                            <td>{{ entry.password }}</td>
-                                            <td>{{ entry.notes }}</td>
-                                            <td>{{ entry.created_at }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="subtitle">No passwords yet. Add your first one below.</div>
-                        {% endif %}
-
-                        <div class="subtitle">Add a password</div>
-
-                        <form class="form" method="POST" action="/add-entry">
-                <div class="form__field">
-                    <input type="text" name="site" placeholder="Site" required />
-                </div>
-                <div class="form__field">
-                    <input type="text" name="username" placeholder="Username" required />
-                </div>
-                <div class="form__field">
-                    <input type="password" name="password" placeholder="Password" required />
-                </div>
-                <div class="form__field">
-                    <input type="text" name="notes" placeholder="Notes (optional)" />
-                </div>
-                <div class="form__field">
-                    <input type="submit" value="Add Password" />
-                </div>
-            </form>
-
-            <a href="/logout">Logout</a>
+      <div class="header-row">
+        <div>
+          <div class="brand">Enclav3</div>
+          <div class="subtitle">Your passwords</div>
         </div>
+        <a class="logout-link" href="/logout">Logout</a>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="success">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% if entries %}
+        <table class="passwords">
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Notes</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for entry in entries %}
+              <tr>
+                <td>{{ entry.site }}</td>
+                <td>{{ entry.username }}</td>
+                <td>{{ entry.password }}</td>
+                <td class="wrap">{{ entry.notes }}</td>
+                <td class="wrap">{{ entry.created_at }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="subtitle">No passwords yet. Add your first one below.</div>
+      {% endif %}
+
+      <div class="section-title">Add a password</div>
+
+      <form class="form" method="POST" action="/add-entry">
+        <div class="form__field">
+          <input type="text" name="site" placeholder="Site" required />
+        </div>
+        <div class="form__field">
+          <input type="text" name="username" placeholder="Username" required />
+        </div>
+        <div class="form__field">
+          <input type="password" name="password" placeholder="Password" required />
+        </div>
+        <div class="form__field">
+          <input type="text" name="notes" placeholder="Notes (optional)" />
+        </div>
+        <div class="form__field">
+          <input type="submit" value="Add Password" />
+        </div>
+      </form>
+
     </div>
+  </div>
 </body>
-
-
 </html>

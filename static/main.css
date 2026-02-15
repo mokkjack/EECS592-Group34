@@ -1,0 +1,74 @@
+/* CSS file for the main dashboard page when user logs in. */ 
+
+/* Make main page container wider than login box */
+.grid.wide {
+  max-width: 1200px; 
+  width: 92%;
+}
+
+.register.left {
+  text-align: left;
+  padding: 2.5rem 2rem;
+  width: 100%;
+}
+
+/* Header Row: site + created */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.logout-link {
+  color: #9ad7ff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* Success message styling */
+.success {
+  background: rgba(140, 234, 187, 0.12);
+  border: 1px solid rgba(140, 234, 187, 0.35);
+  color: #8ceabb;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.wrap {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Adds a password form for adding new passwords to the dashboard. */
+.form input[type="text"],
+.form input[type="password"] {
+  margin-bottom: 10px;
+}
+
+/* Table styling for password entries */
+.passwords {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed; /* IMPORTANT: makes column widths obey rules */
+}
+
+.passwords th,
+.passwords td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  text-align: left;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e9eef8;
+  margin: 22px 0 12px;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
