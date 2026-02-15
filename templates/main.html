@@ -1,6 +1,15 @@
+<!--
+Name: main.html
+Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
+Description: This file contains the HTML template for the main page of the Enclav3 application. 
+It defines the structure and layout of the page, including the display of password entries and the form for adding new entries. 
+The template uses Jinja2 syntax to dynamically render password entries from the database and to display flash messages for user feedback.
+Inputs: Password entries retrieved from the database, flash messages for user feedback
+Outputs: Rendered HTML page displaying password entries and a form for adding new entries
+-->
 <!DOCTYPE html>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
 
 <body>
@@ -18,55 +27,108 @@
             {% endwith %}
 
                         {% if entries %}
-                            <table class="passwords">
-                                <thead>
-                                    <tr>
-                                        <th>Site</th>
-                                        <th>Username</th>
-                                        <th>Password</th>
-                                        <th>Notes</th>
-                                        <th>Created</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for entry in entries %}
-                                        <tr>
-                                            <td>{{ entry.site }}</td>
-                                            <td>{{ entry.username }}</td>
-                                            <td>{{ entry.password }}</td>
-                                            <td>{{ entry.notes }}</td>
-                                            <td>{{ entry.created_at }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="subtitle">No passwords yet. Add your first one below.</div>
-                        {% endif %}
+                        <div class="password_cards">
+                            {% for entry in entries %}
+                                <div class="password_card">
+                                    <div class="card_header">
+                                        <h3>{{ entry.site }}</h3>
+                                        <div class="card_actions">
+                                            <span class="card_date">{{ entry.created_at }}</span>
+                                            <form class="delete_form" method="POST" action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+                                                <button type="submit" class="delete_button" title="Delete" onclick="return confirm('Delete this entry?')">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </div>
 
-                        <div class="subtitle">Add a password</div>
+                                    <div class="card_body">
+                                        <p><strong>Username:</strong> {{ entry.username }}</p>
+                                        <p>
+                                            <strong>Password:</strong> 
+                                            <span class="password_text">••••••••</span>
+                                            <span class="real_password" style="display:none;">{{ entry.password }}</span>
+                                            <button type="button" class="toggle_password">Show</button>
+                                        </p>
+                                        <p><strong>Tier:</strong> {{ entry.tier }}</p>
+
+                                        {% if entry.notes %}
+                                            <p><strong>Notes:</strong> {{ entry.notes }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="subtitle">No passwords yet. Add your first one below.</div>
+                    {% endif %}
+
 
                         <form class="form" method="POST" action="/add-entry">
-                <div class="form__field">
-                    <input type="text" name="site" placeholder="Site" required />
-                </div>
-                <div class="form__field">
-                    <input type="text" name="username" placeholder="Username" required />
-                </div>
-                <div class="form__field">
-                    <input type="password" name="password" placeholder="Password" required />
-                </div>
-                <div class="form__field">
-                    <input type="text" name="notes" placeholder="Notes (optional)" />
+                            
+                <div class="form_layout">
+                    <!-- left side of box -->
+                    <div class="form_left">
+                        <div class="title">Add a Password</div>
+                        <div class="form__field" >
+                            <input type="text" name="site" autocomplete="off" autocapitalize="on" placeholder="Site" required />
+                        </div>
+                        <div class="form__field" >
+                            <input type="text" name="username" autocomplete="off" placeholder="Username" required />
+                        </div>
+                        <div class="form__field" >
+                            <input type="password" name="password" autocomplete="off" placeholder="Password" required />
+                        </div>
+                        
+                        <div class="form__field" >
+                            <input type="text" name="notes" autocomplete="off" placeholder="Notes (optional)" />
+                        </div>
+                    </div>
+
+                    <!-- right side of box -->
+                    <div class="form_right"> 
+                        <div class="title">Choose a Password Tier</div>
+
+                        <div class="radio_option">
+                            <input type="radio" id="tier1" name="option" value="low" checked>
+                            <label for ="tier1">Tier 1</label>
+                        </div>
+                        <div class="radio_option">
+                            <input type="radio" id="tier2" name="option" value="medium">
+                            <label for ="tier2">Tier 2</label>
+                        </div>
+                        <div class="radio_option">
+                            <input type="radio" id="tier3" name="option" value="high">
+                            <label for ="tier3">Tier 3</label>
+                        </div>
+                    </div>      
                 </div>
                 <div class="form__field">
                     <input type="submit" value="Add Password" />
                 </div>
             </form>
 
-            <a href="/logout">Logout</a>
+            <a href="/logout" class="logout">Logout</a>
         </div>
     </div>
+
+<script>
+document.querySelectorAll(".toggle_password").forEach(button => {
+    button.addEventListener("click", function() {
+        const card = this.closest(".card_body");
+        const hidden = card.querySelector(".password_text");
+        const real = card.querySelector(".real_password");
+
+        if (real.style.display === "none") {
+            real.style.display = "inline";
+            hidden.style.display = "none";
+            this.textContent = "Hide";
+        } else {
+            real.style.display = "none";
+            hidden.style.display = "inline";
+            this.textContent = "Show";
+        }
+    });
+});
+</script>
 </body>
 
 

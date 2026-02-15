@@ -1,62 +1,49 @@
-# Project Title
+# ENCLAV3
 
-Simple overview of use/purpose.
+A Multitiered password manager and data vault
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+ENCLAV3 strives to be more than only a password manager. With multple tiers of protection to ensure that no matter what type of file or information needs to be stored it will remian protected. The lowest tier acts a a basic password manager, allowing the user to store passwords from different websites.The highest tier gives access to ENCLAV3's data vault. Giving the user the ability to store images, documents, and other sensitive or personal files into the secured vault.
 
-## Getting Started
+## Features
+- Local, encrypted password vault (SQLite)
+- Three security tiers with different key-derivation strength
+- Desktop UI powered by pywebview
+- Simple add/view workflow with optional notes
 
-### Dependencies
+## Requirements
+- Python 3.10+ recommended
+- pip
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+Python dependencies are listed in [requirements.txt](requirements.txt).
 
-### Installing
+## Quick Start (Build the Desktop App)
+Run the installer script and select your OS:
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
-
-### Executing program
-
-* How to run the program
-* Step-by-step bullets
 ```
-code blocks for commands
-```
-
-## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
+./install.sh
 ```
 
-## Authors
+This installs dependencies (if needed) and produces a standalone build using PyInstaller. The output will be placed under the dist directory (created by PyInstaller).
 
-Contributors names and contact info
+## Run From Source (Development)
+If you want to run the app directly without building:
 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+```
+python -m pip install -r requirements.txt
+python app.py
+```
 
-## Version History
+The app launches a local Flask server and opens a desktop window.
 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
+## Project Structure
+- [app.py](app.py): Flask routes and desktop app startup
+- [backend.py](backend.py): Database and encryption logic
+- [templates](templates): HTML views
+- [static](static): CSS assets
+- [install.sh](install.sh): Cross-platform build script
 
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
-
-## Acknowledgments
-
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+## Notes
+- The database is stored in the user’s application data folder under an Enclav3 directory.
+- If you forget your master password, encrypted entries cannot be recovered.

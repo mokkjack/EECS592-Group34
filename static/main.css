@@ -1,0 +1,250 @@
+/* Base Box */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Helvetica Neue", sans-serif;
+  background-color: #354152;
+  color: #7e8ba3;
+}
+
+/* Layout Format */
+
+/* Centers the login box in the middle of the page */
+.align {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Sets the width of the login box and centers it horizontally */
+.grid {
+  width: 100%;
+  max-width: 100rem;
+  margin: 0 auto;
+}
+
+/* Login box */
+.register {
+  text-align: center;
+  padding: 4rem 2rem;
+  box-shadow: 0 0 250px #000;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  min-height: 1000px;
+}
+
+
+/* Title - Enclav3 */
+.brand {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #7e8ba3;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.form_layout { 
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3rem;
+  text-align: left;
+}
+/* radio css */
+.radio_option input[type="radio"] {
+  display: none;
+}
+
+/* Style the selectable card */
+.radio_option label {
+  display: block;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.9rem;
+  border-radius: 12px;
+  border: 1px solid #242c37;
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.radio_option label:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.radio_option input[type="radio"]:checked + label {
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  border: none;
+  color: white;
+  font-weight: bold;
+}
+
+.form_left,
+.form_right {
+  flex: 1;
+}
+.logout {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  outline: none;
+  font-size: 14px;
+}
+
+.logout:hover {
+  opacity: 0.9;
+}
+/* password cards */
+.password_cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.password_card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #242c37;
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.password_card:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-3px);
+}
+
+.card_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card_actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.delete_form {
+  margin: 0;
+}
+
+.delete_button {
+  padding: 0.35rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #ff9aa2;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.delete_button:hover {
+  background: rgba(255, 154, 162, 0.15);
+}
+
+.card_header h3 {
+  margin: 0;
+  color: #8ceabb;
+}
+
+.card_date {
+  font-size: 12px;
+  color: #7e8ba3;
+}
+
+.card_body p {
+  margin: 0.4rem 0;
+  font-size: 14px;
+  color: #fff;
+}
+
+.toggle_password {
+  margin-left: 1rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #8ceabb;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.toggle_password:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+
+/* Input and Spacing */
+
+.form__field {
+  margin-bottom: 1rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  outline: none;
+  font-size: 14px;
+}
+
+input::placeholder {
+  color: #7e8ba3;
+}
+
+/* Green unlock button*/
+
+input[type="submit"] {
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+input[type="submit"]:hover {
+  opacity: 0.9;
+}
+
+/* Helper text for Sizing */
+p {
+  font-size: 13px;
+  margin-top: 1.5rem;
+}

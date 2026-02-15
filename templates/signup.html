@@ -1,10 +1,18 @@
+<!--
+Name: signup.html
+Authors: Jack Morice, Nick Greico, Gunther Luechtefield
+Description: This file contains the HTML template for the signup page of the Enclav3 application. 
+It defines the structure and layout of the signup page, including a form for creating a master password.
+Inputs: Master password and password confirmation
+Outputs: Rendered HTML page for signup, redirect back to login page on successful signup, and error message if passwords do not match
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <title>Create Master Password</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 
 <body class="align">
@@ -14,7 +22,7 @@
 
 			<div class="brand">Enclav3</div>
 			<div class="subtitle">Create your master password</div>
-
+			
 			<form class="form" method="POST" action="/signup">
 				<div class="form__field">
 					<input type="password" name="master_password" placeholder="Master password" required />
@@ -31,7 +39,7 @@
 				<div class="error">{{ error }}</div>
 			{% endif %}
 
-			<a href="/">Back to login</a>
+			<a href="/" class="secondary">Back to login</a>
 
 		</div>
 	</div>
