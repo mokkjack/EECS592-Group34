@@ -46,9 +46,8 @@ class Entry: #Data class representing a password entry
 	notes: Optional[str] = None #Optional notes about the entry
 	tier: str = DEFAULT_TIER #Security tier for the entry, which determines the number of iterations used in key derivation (default is "low")
 
-def _utc_now() -> str: #Helper function to get the current UTC time in ISO format
-	t = datetime.now(timezone.utc).isoformat()
-	return f"{t[5:7]}/{t[8:10]}/{t[0:4]} {t[11:16]}UTC"
+def _utc_now() -> str: #Helper function to get the current time in the computer's local timezone in 12 hour HR:MM AM/PM format
+	return datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %I:%M %p")
 
 def _derive_key(master_password: str, salt: bytes, iterations: int) -> bytes: #Derive a key from the master password using PBKDF2 with HMAC-SHA256
 	#Use PBKDF2 with HMAC-SHA256 to derive a key from the master password, salt, and iteration count. 
