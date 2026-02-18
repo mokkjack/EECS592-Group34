@@ -41,12 +41,26 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                     </div>
 
                                     <div class="card_body">
-                                        <p><strong>Username:</strong> {{ entry.username }}</p>
+                                        <p class="field_row">
+                                        <strong>Username:</strong>
+                                        <span class="field_value">{{ entry.username }}</span>
+
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.username }}">
+                                            Copy
+                                        </button>
+                                        </p>
+
                                         <p>
                                             <strong>Password:</strong> 
                                             <span class="password_text">••••••••</span>
                                             <span class="real_password" style="display:none;">{{ entry.password }}</span>
                                             <button type="button" class="toggle_password">Show</button>
+                                            <button type="button" class="copy_button" data-copy="{{ entry.password }}">
+                                                Copy 
+                                            </button>
+
                                         </p>
                                         <p><strong>Tier:</strong> {{ entry.tier }}</p>
 
@@ -129,6 +143,32 @@ document.querySelectorAll(".toggle_password").forEach(button => {
         }
     });
 });
+
+// Listens for clicks on the page
+document.addEventListener("click", async (e) => {
+
+    // checks if the clicked button is a button with the class copy button
+  const btn = e.target.closest(".copy_button");
+  if (!btn) return;
+
+  const text = btn.dataset.copy;
+
+  try {
+    // copies the text 
+    await navigator.clipboard.writeText(text);
+
+    const original = btn.textContent;
+    btn.textContent = "Copied!";
+
+    // displays the message copied for 2 seconds
+    setTimeout(() => btn.textContent = original, 2000);
+
+  } catch {
+    // if copying fails
+    btn.textContent = "Failed";
+  }
+});
+
 </script>
 </body>
 
