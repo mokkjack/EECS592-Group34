@@ -1,6 +1,6 @@
 '''
 Name: backend.py
-Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
+Authors: Jack Morice, Nick Grieco, Alex Carrillo, Gunther Luechtefield
 Description: This file contains the backend implmenetation of enclav3. It defines the construction of the database, encryption and decryption of entires,
 as well as the CRUD operations on the database. The backend is used by the Flask application defined in app.py to handle all interactions with the database and encryption logic.
 Inputs: User interactions with the web interface (add entry, list entries, get entry, delete entry, update entry)

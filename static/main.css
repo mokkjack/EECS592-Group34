@@ -247,6 +247,33 @@ input[type="submit"] {
 input[type="submit"]:hover {
   opacity: 0.9;
 }
+/* Copy Button */
+.copy_button {
+  margin-left: 0.6rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #8ceabb;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.copy_button:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+/* Layout for username/password rows with Copy Button */
+.field_row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap; 
+}
+
+.field_value {
+  word-break: break-all; 
+}
 
 /* Helper text for Sizing */
 p {

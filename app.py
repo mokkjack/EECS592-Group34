@@ -1,6 +1,6 @@
 '''
 Name: app.py
-Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
+Authors: Jack Morice, Nick Grieco, Alex Carrillo, Gunther Luechtefield
 Description: This file contains the Flask implementation, and defines routes for CRUD operations on password entries, as well as authentication.
 It also sets up the desktop application using pywebview, running the Flask server in a separate thread to serve the web interface.
 Inputs: User interactions with the web interface (login, signup, add entry, logout)
@@ -48,7 +48,10 @@ def main(): #If the master password is not in the session, redirect to the login
     except RuntimeError as exc: #Error handling
         flash(str(exc))
         entries = []
-    return render_template("main.html", entries=entries) #Render the main page with the decrypted entries
+    tier1_entries = [e for e in entries if e.get("tier") == "low"]
+    tier2_entries = [e for e in entries if e.get("tier") == "medium"]
+    tier3_entries = [e for e in entries if e.get("tier") == "high"]
+    return render_template("main.html", entries=entries, tier1_entries=tier1_entries, tier2_entries=tier2_entries, tier3_entries=tier3_entries) #Render the main page with the decrypted entries
 
 @app.route("/signup", methods=["GET", "POST"]) #Signup page handler
 def signup(): #Signing up for a new master password
