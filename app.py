@@ -46,7 +46,7 @@ def main(): #If the master password is not in the session, redirect to the login
 
     try: #Get all passwords
         sort = request.args.get("sort", "alpha")
-        entries = backend.list_entries(DB_PATH, sort)
+        entries = backend.list_entries(DB_PATH, session["master_password"], sort)
         
     except RuntimeError as exc: #Error handling
         flash(str(exc))
@@ -97,7 +97,7 @@ def add_entry(): #Add password entry handler
         return redirect(url_for("main"))
 
     try: #Try to add the new entry using the backend function, encrypting it with the master password from the session
-        backend.add_entry(DB_PATH, Entry(site=site, username=username, password=password, notes=notes, tier=tier))
+        backend.add_entry(DB_PATH, Entry(site=site, username=username, password=password, notes=notes, tier=tier), master_password)
     except RuntimeError as exc:
         flash(str(exc))
     else:

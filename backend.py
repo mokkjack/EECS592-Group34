@@ -170,17 +170,31 @@ def _load_master_key(db_path: str, master_password: str) -> bytes:
 def verify_master_password(db_path: str, master_password: str) -> None: #Helper function to verify the master password by attempting to load the master key. If the master password is incorrect, this will raise an error from the _load_master_key function.
 	_load_master_key(db_path, master_password)
 
-def add_entry(db_path: str, entry: Entry) -> None: #Add a new password entry to the database, encrypting the password using the master key derived from the master password
+def add_entry(db_path: str, entry: Entry, master_password: str) -> None: #Add a new password entry to the database, encrypting the password and username using the tier-specific key derived from the master password
+	meta = _load_meta(db_path)
+	
+	# Get tier-specific salt and iterations
+	tier_salt_key = _tier_salt_key(entry.tier)
+	tier_iter_key = _tier_iterations_key(entry.tier)
+	tier_salt = base64.b64decode(meta[tier_salt_key])
+	tier_iterations = int(meta[tier_iter_key])
+	
+	# Derive encryption key using master password and tier-specific parameters
+	encryption_key = _derive_key(master_password, tier_salt, tier_iterations)
+	cipher = Fernet(encryption_key)
+	encrypted_password = cipher.encrypt(entry.password.encode('utf-8')).decode('utf-8')
+	encrypted_username = cipher.encrypt(entry.username.encode('utf-8')).decode('utf-8')
+	
 	with _get_connection(db_path) as conn:
-		conn.execute( #Add the new entry to the entries table, storing the site, username, encrypted password, notes, and creation timestamp
+		conn.execute( #Add the new entry to the entries table, storing the site, encrypted username, encrypted password, notes, and creation timestamp
 			"""
 			INSERT INTO entries (site, username, password_enc, notes, created_at, tier)
 			VALUES (?, ?, ?, ?, ?, ?)
 			""",
-			(entry.site, entry.username, entry.password, entry.notes, _utc_now(), entry.tier),
+			(entry.site, encrypted_username, encrypted_password, entry.notes, _utc_now(), entry.tier),
 		)
 
-def list_entries(db_path: str, sort: str = "alpha") -> list[dict[str, str]]: #List all entries in the database
+def list_entries(db_path: str, master_password: str, sort: str = "alpha") -> list[dict[str, str]]: #List all entries in the database, decrypting passwords and usernames using the master password
 	# sorting logic
 	if sort == "alpha":
 		order_clause = "ORDER BY site ASC"
@@ -194,7 +208,8 @@ def list_entries(db_path: str, sort: str = "alpha") -> list[dict[str, str]]: #Li
 	else:
 		order_clause = "ORDER BY site ASC"
 
-
+	meta = _load_meta(db_path)
+	
 	with _get_connection(db_path) as conn:
 		rows = conn.execute(
 			f"SELECT id, site, username, password_enc, notes, created_at, tier FROM entries {order_clause}"
@@ -202,13 +217,32 @@ def list_entries(db_path: str, sort: str = "alpha") -> list[dict[str, str]]: #Li
 		
 	entries: list[dict[str, str]] = []
 	for row in rows:
-		entry_id, site, username, password_enc, notes, created_at, tier = row
+		entry_id, site, username_enc, password_enc, notes, created_at, tier = row
+		
+		# Decrypt password and username using tier-specific salt and iterations with master password
+		tier_salt_key = _tier_salt_key(tier)
+		tier_iter_key = _tier_iterations_key(tier)
+		tier_salt = base64.b64decode(meta[tier_salt_key])
+		tier_iterations = int(meta[tier_iter_key])
+		
+		try:
+			# Derive key using master password and tier-specific parameters
+			encryption_key = _derive_key(master_password, tier_salt, tier_iterations)
+			cipher = Fernet(encryption_key)
+			decrypted_password = cipher.decrypt(password_enc.encode('utf-8')).decode('utf-8')
+			decrypted_username = cipher.decrypt(username_enc.encode('utf-8')).decode('utf-8')
+			display_password = decrypted_password
+			display_username = decrypted_username
+		except (InvalidToken, Exception):
+			display_password = "[Unable to decrypt]"
+			display_username = "[Unable to decrypt]"
+		
 		entries.append(
 			{
 				"id": str(entry_id),
 				"site": site,
-				"username": username,
-				"password": password_enc,
+				"username": display_username,
+				"password": display_password,
 				"notes": notes or "",
 				"created_at": created_at,
 				"tier": tier,
@@ -298,12 +332,14 @@ def main() -> None:
 	if args.command == "add": #add entry
 		password = args.password or getpass.getpass("Password: ")
 		entry = Entry(site=args.site, username=args.username, password=password, notes=args.notes, tier=args.tier)
-		add_entry(db_path, entry)
+		add_entry(db_path, entry, master_password)
 		print("Entry added.")
 		return
 
 	if args.command == "list": #list all entries
-		list_entries(db_path)
+		entries = list_entries(db_path, master_password)
+		for entry in entries:
+			print(f"ID: {entry['id']}, Site: {entry['site']}, Username: {entry['username']}, Tier: {entry['tier']}")
 		return
 
 	if args.command == "delete": #Delete an entry by ID
