@@ -43,11 +43,16 @@ def login(): #Login page handler
 def main(): #If the master password is not in the session, redirect to the login page
     if "master_password" not in session: #If the master password is not in the session, redirect to the login page
         return redirect(url_for("login")) #Redirect to the login page
+
     try: #Get all passwords
-        entries = backend.list_entries(DB_PATH)
+        sort = request.args.get("sort", "alpha")
+        entries = backend.list_entries(DB_PATH, sort)
+        
     except RuntimeError as exc: #Error handling
         flash(str(exc))
         entries = []
+
+    # tier filtering
     tier1_entries = [e for e in entries if e.get("tier") == "low"]
     tier2_entries = [e for e in entries if e.get("tier") == "medium"]
     tier3_entries = [e for e in entries if e.get("tier") == "high"]

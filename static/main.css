@@ -52,7 +52,7 @@ html, body {
 .subtitle {
   font-size: 0.9rem;
   color: #7e8ba3;
-  margin-bottom: 2rem;
+  margin-bottom: 0rem;
 }
 
 .title {
@@ -70,12 +70,43 @@ html, body {
   gap: 3rem;
   text-align: left;
 }
+
+#toggleAllTiers {
+  padding: 0.25rem 0.7rem;      
+  border-radius: 999px;            
+  border: 1px solid #242c37;     
+  background: transparent;        
+  color: #8ceabb;                 
+  font-size: 12px;                
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;            
+  justify-content: center;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+#toggleAllTiers:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+#toggleAllTiers:active {
+  background: rgba(140,234,187,0.2);
+}
+
+#toggleAllTiers.active {
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  border: none;
+  color: white;
+}
+
 /* radio css */
 .radio_option input[type="radio"] {
   display: none;
 }
 
-/* Style the selectable card */
+/* style the selectable card */
 .radio_option label {
   display: block;
   padding: 0.8rem 1.2rem;
@@ -100,6 +131,42 @@ html, body {
   font-weight: bold;
 }
 
+/* radio row css for sorting options */
+.radio_row {
+  display: inline-flex;      
+  gap: 1rem;         
+  flex-wrap: wrap;     
+  justify-content: center;
+  align-items: center;
+}
+.radio_row input[type="radio"] {
+  display: none;
+}
+
+/* style the selectable card */
+.radio_row label {
+  display: flex;padding: 0.8rem 1.2rem;
+  align-items: center;
+  padding: 0.6rem 1.0rem;
+  border-radius: 12px;
+  border: 1px solid #242c37;
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.radio_row label:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.radio_row input[type="radio"]:checked + label {
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  border: none;
+  color: white;
+  font-weight: bold;
+}
 .form_left,
 .form_right {
   flex: 1;
@@ -280,3 +347,46 @@ p {
   font-size: 13px;
   margin-top: 1.5rem;
 }
+
+.tier_summary {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0.25rem 0.7rem;      
+    border-radius: 999px;           
+    border: 1px solid #242c37;
+    background: transparent;        
+    color: #8ceabb;
+    font-size: 12px;                
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: fit-content;
+    margin-bottom: 10px;        
+}
+
+.tier_summary:hover {
+    background: rgba(140,234,187,0.1);
+}
+
+.tier_summary:active {
+    background: rgba(140,234,187,0.2);
+}
+
+.tier_count {
+    font-size: 12px;
+    color: #fff; 
+    margin-left: 0.5rem;
+}
+
+.tier_summary::after {
+    content: "▾";             /* down arrow by default */
+    font-size: 12px;
+    margin-left: 0.5rem;      /* spacing from text */
+    transition: transform 0.2s ease; /* smooth rotation */
+}
+
+.tier_group[open] .tier_summary::after {
+    content: "▴"; /* up arrow when open */
+}
+

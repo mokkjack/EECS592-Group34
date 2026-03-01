@@ -180,11 +180,26 @@ def add_entry(db_path: str, entry: Entry) -> None: #Add a new password entry to 
 			(entry.site, entry.username, entry.password, entry.notes, _utc_now(), entry.tier),
 		)
 
-def list_entries(db_path: str) -> list[dict[str, str]]: #List all entries in the database
+def list_entries(db_path: str, sort: str = "alpha") -> list[dict[str, str]]: #List all entries in the database
+	# sorting logic
+	if sort == "alpha":
+		order_clause = "ORDER BY site ASC"
+	
+	elif sort == "newest":
+		order_clause = "ORDER BY created_at DESC"
+
+	elif sort == "oldest":
+		order_clause = "ORDER BY created_at ASC"
+
+	else:
+		order_clause = "ORDER BY site ASC"
+
+
 	with _get_connection(db_path) as conn:
 		rows = conn.execute(
-			"SELECT id, site, username, password_enc, notes, created_at, tier FROM entries ORDER BY site"
+			f"SELECT id, site, username, password_enc, notes, created_at, tier FROM entries {order_clause}"
 		).fetchall()
+		
 	entries: list[dict[str, str]] = []
 	for row in rows:
 		entry_id, site, username, password_enc, notes, created_at, tier = row

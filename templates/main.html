@@ -27,11 +27,39 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
             {% endwith %}
 
             {% if tier1_entries or tier2_entries or tier3_entries %} <!-- only show tiers if there are entries -->
+            <div class="subtitle">Sort By:</div>
+            <form method="GET" action="{{ url_for('main') }}">
+    
+
+                <div class="radio_row">
+                    <input type="radio" id="alphabetical" name="sort" value="alpha"
+                        {{ 'checked' if sort == 'alpha' else '' }}
+                        onchange="this.form.submit()">
+                        <label for = "alphabetical">A - Z</label>
+                </div>
+
+                <div class="radio_row">
+                    <input type="radio" id="newest" name="sort" value="newest"
+                        {{ 'checked' if sort == 'newest' else '' }}
+                        onchange="this.form.submit()">
+                        <label for = "newest">Newest First</label>
+                </div>
+
+                <div class="radio_row">
+                    <input type="radio" id="oldest" name="sort" value="oldest"
+                        {{ 'checked' if sort == 'oldest' else '' }}
+                        onchange="this.form.submit()">
+                        <label for = "oldest">Oldest First</label> 
+                </div>
+            
+            <div class="button">
+                <button type="button" id="toggleAllTiers">Show All</button>
+            </div>
 
             <div class="tier_groups">
 
                 <!-- TIER 1 -->
-                <details class="tier_group" open>
+                <details class="tier_group" id="tier1">
                     <summary class="tier_summary">
                         <span>Tier 1</span>
                         <span class="tier_count">({{ tier1_entries|length }})</span>
@@ -78,13 +106,12 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                     <span class="real_password" style="display:none;">
                                         {{ entry.password }}
                                     </span>
-
-                                    <button type="button" class="toggle_password">Show</button>
                                     <button type="button"
                                             class="copy_button"
                                             data-copy="{{ entry.password }}">
                                         Copy
                                     </button>
+                                    <button type="button" class="toggle_password">Show</button>   
                                 </p>
 
                                 {% if entry.notes %}
@@ -103,7 +130,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                 </details>
 
                 <!-- TIER 2 -->
-                <details class="tier_group">
+                <details class="tier_group" id="tier2">
                     <summary class="tier_summary">
                         <span>Tier 2</span>
                         <span class="tier_count">({{ tier2_entries|length }})</span>
@@ -150,13 +177,13 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                     <span class="real_password" style="display:none;">
                                         {{ entry.password }}
                                     </span>
-
-                                    <button type="button" class="toggle_password">Show</button>
                                     <button type="button"
                                             class="copy_button"
                                             data-copy="{{ entry.password }}">
                                         Copy
                                     </button>
+                                    <button type="button" class="toggle_password">Show</button>
+                                    
                                 </p>
 
                                 {% if entry.notes %}
@@ -175,7 +202,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                 </details>
 
                 <!-- TIER 3 -->
-                <details class="tier_group">
+                <details class="tier_group" id="tier3">
                     <summary class="tier_summary">
                         <span>Tier 3</span>
                         <span class="tier_count">({{ tier3_entries|length }})</span>
@@ -218,14 +245,16 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                 <p class="field_row">
                                     <strong>Password:</strong>
                                     <span class="password_text">••••••••</span>
-                                    <span class="real_password" style="display:none;">{{ entry.password }}</span>
-
-                                    <button type="button" class="toggle_password">Show</button>
+                                    <span class="real_password" style="display:none;">
+                                        {{ entry.password }}
+                                    </span>
                                     <button type="button"
                                             class="copy_button"
                                             data-copy="{{ entry.password }}">
                                         Copy
                                     </button>
+                                    <button type="button" class="toggle_password">Show</button>
+                                    
                                 </p>
 
                                 {% if entry.notes %}
@@ -340,6 +369,27 @@ document.addEventListener("click", async (e) => {
 });
 
 </script>
+
+<script>
+const toggleBtn = document.getElementById("toggleAllTiers");
+const tiers = ["tier1", "tier2", "tier3"];
+let allOpen = false; // tracks current state
+
+toggleBtn.addEventListener("click", () => {
+    tiers.forEach(id => {
+        const details = document.getElementById(id);
+        if (allOpen) {
+            details.removeAttribute("open"); // close all
+        } else {
+            details.setAttribute("open", ""); // open all
+        }
+    });
+
+    allOpen = !allOpen;
+    toggleBtn.textContent = allOpen ? "Hide All" : "Show All";
+});
+</script>
+
 </body>
 
 
