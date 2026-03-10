@@ -3,6 +3,47 @@
 
 <body>
     <h1 class="brand">Enclav3 Settings</h1>
+    <div class="settings_section">
+        <h2 class="section_title">Security</h2>
+        
+        <!-- PIN Setup -->
+        <details class="settings_group">
+            <summary class="settings_summary">🔢 Set Up Security PIN</summary>
+            <form method="POST" action="/setup-pin">
+                <div class="form__field">
+                    <input type="password" name="pin" placeholder="Enter PIN (6+ digits)" pattern="\d{6,}" required />
+                </div>
+                <div class="form__field">
+                    <input type="password" name="confirm_pin" placeholder="Confirm PIN" pattern="\d{6,}" required />
+                </div>
+                <div class="form__field">
+                    <input type="submit" value="Save PIN" />
+                </div>
+            </form>
+        </details>
+        
+        <!-- Challenge Question Setup -->
+        <details class="settings_group">
+            <summary class="settings_summary">🔐 Set Up Challenge Question</summary>
+            <form method="POST" action="/setup-challenge">
+                <div class="form__field">
+                    <select name="question" class="settings_select">
+                        <option value="">-- Choose a question --</option>
+                        <option value="maiden">What is your mother's maiden name?</option>
+                        <option value="street">What street did you grow up on?</option>
+                        <option value="pet">What was your first pet's name?</option>
+                        <option value="school">What was the name of your elementary school?</option>
+                        <option value="city">In what city were you born?</option>
+                    </select>
+                </div>
+                <div class="form__field">
+                    <input type="text" name="answer" placeholder="Your answer" required />
+                </div>
+                <div class="form__field">
+                    <input type="submit" value="Save Question" />
+                </div>
+
+    </div>
     <a href="/main" class="main">Back to Account</a>
     </body>
 </html>

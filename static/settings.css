@@ -29,8 +29,103 @@ html, body {
   font-size: 14px;
 }
 
-/* Helper text for Sizing */
-p {
-  font-size: 13px;
-  margin-top: 1.5rem;
+
+/* For the sections in settings */
+.settings_section {
+    max-width: 30rem;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+}
+
+/* Title text above each settings section */
+.section_title {
+    color: white;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+/* Card container for each collapsible settings group */
+.settings_group {
+    border: 1px solid #242c37;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    padding: 1rem;
+}
+
+/* Clickable summary/header for each collapsible settings group */
+.settings_summary {
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    list-style: none;
+    padding: 0.4rem 0;
+}
+
+/* Highlights summary text green on hover */
+.settings_summary:hover {
+    color: #8ceabb;
+}
+
+/* Dropdown select for challenge question options */
+.settings_select {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #242c37;
+    background: transparent;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* Background color for dropdown options */
+.settings_select option {
+    background: #2a3344;
+}
+
+/* Styles for text and password input fields */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #242c37;
+    background: transparent;
+    color: #fff;
+    text-align: center;
+    outline: none;
+    font-size: 14px;
+    margin-top: 1rem;
+    box-sizing: border-box;
+}
+
+/* Placeholder text color for all inputs */
+input::placeholder {
+    color: #7e8ba3;
+}
+
+/* Green gradient submit button */
+input[type="submit"] {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 1rem;
+    box-sizing: border-box;
+}
+
+/* Slightly fades the submit button on hover */
+input[type="submit"]:hover {
+    opacity: 0.9;
 }
