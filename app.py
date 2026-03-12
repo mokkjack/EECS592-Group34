@@ -120,6 +120,30 @@ def delete_entry(entry_id: int): #Delete password entry handler
 
     return redirect(url_for("main"))
 
+@app.route("/edit-entry/<int:entry_id>", methods=["POST"])
+def edit_entry(entry_id: int): #edit password entry handler
+    master_password = session.get("master_password")
+    if not master_password: #if the master password is not in the session, redirect to the login page
+        return redirect(url_for("login"))
+    site = request.form.get("site", "").strip() #get the site from the form and strip whitespace
+    username = request.form.get("username", "").strip() #get the username from the form and strip whitespace
+    password = request.form.get("password", "").strip() #get the password from the form and strip whitespace
+    notes = request.form.get("notes", "").strip() or None
+    tier = request.form.get("tier", "").strip() or backend.DEFAULT_TIER #allows you to change tier of entry
+
+    #error handling for empty required fields (site, username, password)
+    if not site or not username or not password:
+        flash("Site, username, and password are required.")
+        return redirect(url_for("main"))
+
+    #try to edit the entry with the given ID
+    try:
+        backend.edit_entry(DB_PATH, master_password, entry_id, site, username, password, notes, tier)
+    except RuntimeError as exc:
+        flash(str(exc))
+    else:
+        flash("Entry updated.")
+    return redirect(url_for("main"))
 
 @app.route("/logout")
 def logout(): #Logout handler

@@ -265,6 +265,8 @@ html, body {
 .toggle_password {
   margin-left: 1rem;
   padding: 0.3rem 0.8rem;
+  min-width: 4rem;
+  text-align: center;
   border-radius: 999px;
   border: 1px solid #242c37;
   background: transparent;
@@ -318,6 +320,8 @@ input[type="submit"]:hover {
 .copy_button {
   margin-left: 0.6rem;
   padding: 0.25rem 0.7rem;
+  min-width: 4rem;
+  text-align: center;
   border-radius: 999px;
   border: 1px solid #242c37;
   background: transparent;
@@ -335,11 +339,11 @@ input[type="submit"]:hover {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 
 .field_value {
-  word-break: break-all; 
+  word-break: break-all;
 }
 
 /* Helper text for Sizing */
@@ -390,3 +394,123 @@ p {
     content: "▴"; /* up arrow when open */
 }
 
+/* Edit Button */
+.edit_button {
+  margin-left: 1rem;
+  padding: 0.3rem 0.8rem;
+  min-width: 4rem;
+  text-align: center;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #8ceabb;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit_button:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+/* Edit Model Overlay */
+.edit_model_overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+/* Edit Model Content */
+.edit_model {
+  background: #1a2130;
+  border: 1px solid #242c37;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.5rem;
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.edit_model_title {
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+/* Scoped inputs inside the edit model */
+.edit_model input[type="text"],
+.edit_model input[type="password"] {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid #2e3a4a;
+  background: #131b27;
+  color: #fff;
+  text-align: center;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+/* Placeholder color for inputs inside the edit model */
+.edit_model input[type="text"]::placeholder,
+.edit_model input[type="password"]::placeholder {
+  color: #7e8ba3;
+}
+/* Submit Button inside Edit Model */
+.edit_model input[type="submit"] {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: #fff;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+/* Edit Tier Options */
+.edit_tier_row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 0.1rem 0 0.25rem;
+}
+/* Label for each tier option */
+.edit_tier_label {
+  color: #8ceabb;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Style the radio buttons for tier selection */
+.edit_tier_label input[type="radio"] {
+  width: auto;
+  padding: 0;
+  accent-color: #8ceabb;
+  cursor: pointer;
+}
+/* Cancel Button */
+.edit_cancel_button {
+  padding: 0.55rem 1.8rem;
+  border-radius: 999px;
+  border: 1px solid #2e3a4a;
+  background: transparent;
+  color: #7e8ba3;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: center;
+  transition: all 0.2s ease;
+  margin-top: 0.25rem;
+}
+
+.edit_cancel_button:hover {
+  background: rgba(255,255,255,0.05);
+}

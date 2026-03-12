@@ -259,6 +259,32 @@ def delete_entry(db_path: str, master_password: str, entry_id: int) -> None: #De
 		else:
 			print("Entry deleted.")
 
+#edit entries function. 
+def edit_entry(db_path: str, master_password: str, entry_id: int, site: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None, notes: Optional[str] = None, tier: Optional[str] = None) -> None:
+	_load_master_key(db_path, master_password)
+	meta = _load_meta(db_path)
+
+	# get tier-specific salt and iterations
+	tier_salt_key = _tier_salt_key(tier)
+	tier_iter_key = _tier_iterations_key(tier)
+	tier_salt = base64.b64decode(meta[tier_salt_key])
+	tier_iterations = int(meta[tier_iter_key])
+
+	# derive encryption key using master password and tier-specific parameters
+	encryption_key = _derive_key(master_password, tier_salt, tier_iterations)
+	cipher = Fernet(encryption_key)
+	encrypted_password = cipher.encrypt(password.encode('utf-8')).decode('utf-8')
+	encrypted_username = cipher.encrypt(username.encode('utf-8')).decode('utf-8')
+
+	#updates entries in the database
+	with _get_connection(db_path) as conn:
+		cur = conn.execute(
+			"UPDATE entries SET site=?, username=?, password_enc=?, notes=?, tier=? WHERE id=?",
+			(site, encrypted_username, encrypted_password, notes, tier, entry_id),
+		)
+		if cur.rowcount == 0:
+			print("Entry not found.")
+
 def _prompt_master_password(confirm: bool = False) -> str: 
 	#Helper function to prompt the user for the master password
 	while True:

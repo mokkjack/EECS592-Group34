@@ -98,6 +98,16 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                             data-copy="{{ entry.username }}">
                                         Copy
                                     </button>
+                                    <button type="button"
+                                            class="edit_button"
+                                            data-id="{{ entry.id }}"
+                                            data-site="{{ entry.site }}"
+                                            data-username="{{ entry.username }}"
+                                            data-password="{{ entry.password }}"
+                                            data-notes="{{ entry.notes }}"
+                                            data-tier="low">
+                                        Edit
+                                    </button>
                                 </p>
 
                                 <p class="field_row"> <!-- displays the password with a button to show and hide and a copy button -->
@@ -111,7 +121,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                             data-copy="{{ entry.password }}">
                                         Copy
                                     </button>
-                                    <button type="button" class="toggle_password">Show</button>   
+                                    <button type="button" class="toggle_password">Show</button>
                                 </p>
 
                                 {% if entry.notes %}
@@ -169,6 +179,16 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                             data-copy="{{ entry.username }}">
                                         Copy
                                     </button>
+                                    <button type="button"
+                                            class="edit_button"
+                                            data-id="{{ entry.id }}"
+                                            data-site="{{ entry.site }}"
+                                            data-username="{{ entry.username }}"
+                                            data-password="{{ entry.password }}"
+                                            data-notes="{{ entry.notes }}"
+                                            data-tier="medium">
+                                        Edit
+                                    </button>
                                 </p>
 
                                 <p class="field_row">
@@ -183,7 +203,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                         Copy
                                     </button>
                                     <button type="button" class="toggle_password">Show</button>
-                                    
                                 </p>
 
                                 {% if entry.notes %}
@@ -240,6 +259,16 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                             data-copy="{{ entry.username }}">
                                         Copy
                                     </button>
+                                    <button type="button"
+                                            class="edit_button"
+                                            data-id="{{ entry.id }}"
+                                            data-site="{{ entry.site }}"
+                                            data-username="{{ entry.username }}"
+                                            data-password="{{ entry.password }}"
+                                            data-notes="{{ entry.notes }}"
+                                            data-tier="high">
+                                        Edit
+                                    </button>
                                 </p>
 
                                 <p class="field_row">
@@ -254,7 +283,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                                         Copy
                                     </button>
                                     <button type="button" class="toggle_password">Show</button>
-                                    
                                 </p>
 
                                 {% if entry.notes %}
@@ -324,6 +352,41 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
         </div>
     </div>
 
+    <!-- Edit Model -->
+    <div id="editModel" class="edit_model_overlay" style="display:none;">
+        <div class="edit_model">
+            <div class="edit_model_title">Edit an Entry:</div>
+            <form id="editForm" method="POST" action="">
+                <div class="form__field">
+                    <input type="text" id="edit_site" name="site" placeholder="Site" required />
+                </div>
+                <div class="form__field">
+                    <input type="text" id="edit_username" name="username" placeholder="Username" required />
+                </div>
+                <div class="form__field">
+                    <input type="text" id="edit_password" name="password" placeholder="Password" required />
+                </div>
+                <div class="form__field">
+                    <input type="text" id="edit_notes" name="notes" placeholder="Notes (optional)" />
+                </div>
+                <div class="edit_tier_row">
+                    <label class="edit_tier_label">
+                        <input type="radio" name="tier" value="low" id="edit_tier1"> Tier 1
+                    </label>
+                    <label class="edit_tier_label">
+                        <input type="radio" name="tier" value="medium" id="edit_tier2"> Tier 2
+                    </label>
+                    <label class="edit_tier_label">
+                        <input type="radio" name="tier" value="high" id="edit_tier3"> Tier 3
+                    </label>
+                </div>
+                <div class="form__field">
+                    <input type="submit" value="Save Changes" />
+                </div>
+            </form>
+            <button type="button" id="closeEditModel" class="edit_cancel_button">Cancel</button>
+        </div>
+    </div>
 <script>
 document.querySelectorAll(".toggle_password").forEach(button => {
     button.addEventListener("click", function() {
@@ -387,6 +450,33 @@ toggleBtn.addEventListener("click", () => {
 
     allOpen = !allOpen;
     toggleBtn.textContent = allOpen ? "Hide All" : "Show All";
+});
+</script>
+
+<script>
+document.querySelectorAll(".edit_button").forEach(btn => {
+    btn.addEventListener("click", function() {
+        // get the entry's ID and populate the edit form fields from data attributes
+        const id = this.dataset.id;
+        document.getElementById("edit_site").value     = this.dataset.site;
+        document.getElementById("edit_username").value = this.dataset.username;
+        document.getElementById("edit_password").value = this.dataset.password;
+        document.getElementById("edit_notes").value    = this.dataset.notes;
+
+        const tier = this.dataset.tier;
+        document.querySelectorAll("#editForm input[name='tier']").forEach(r => {
+            r.checked = (r.value === tier);
+        });
+
+        // set the form action to include the entry ID and show the edit model
+        document.getElementById("editForm").action = "/edit-entry/" + id;
+        document.getElementById("editModel").style.display = "flex";
+    });
+});
+
+// Close the edit model when the close button is clicked
+document.getElementById("closeEditModel").addEventListener("click", () => {
+    document.getElementById("editModel").style.display = "none";
 });
 </script>
 
