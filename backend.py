@@ -18,6 +18,9 @@ from datetime import datetime, timezone
 from hashlib import pbkdf2_hmac
 from typing import Optional
 
+import pyotp
+import qrcode
+from io import BytesIO
 from cryptography.fernet import Fernet, InvalidToken
 
 
@@ -122,6 +125,14 @@ def init_db(db_path: str, master_password: str) -> None: #Initialize the databas
 			"INSERT INTO meta (key, value) VALUES (?, ?)",
 			("verifier", base64.b64encode(verifier).decode("utf-8")),
 		)
+		conn.execute( #Store the 2FA enabled flag (default: False)
+			"INSERT INTO meta (key, value) VALUES (?, ?)",
+			("2fa_enabled", "False"),
+		)
+		conn.execute( #Store the 2FA secret (empty by default)
+			"INSERT INTO meta (key, value) VALUES (?, ?)",
+			("2fa_secret", ""),
+		)
 
 		low_salt_key = _tier_salt_key(DEFAULT_TIER) #Store the salt and iteration count for the default tier
 		low_iter_key = _tier_iterations_key(DEFAULT_TIER) #Store the salt and iteration count for the default tier
@@ -169,6 +180,66 @@ def _load_master_key(db_path: str, master_password: str) -> bytes:
 
 def verify_master_password(db_path: str, master_password: str) -> None: #Helper function to verify the master password by attempting to load the master key. If the master password is incorrect, this will raise an error from the _load_master_key function.
 	_load_master_key(db_path, master_password)
+
+def generate_2fa_secret() -> str:
+	"""Generate a new 2FA secret for Google Authenticator"""
+	return pyotp.random_base32()
+
+def get_2fa_qr_code(secret: str, username: str = "Enclav3") -> str:
+	"""Generate a QR code image as base64 string for 2FA setup"""
+	totp = pyotp.TOTP(secret)
+	provisioning_uri = totp.provisioning_uri(name=username, issuer_name="Enclav3")
+	qr = qrcode.QRCode(version=1, box_size=10, border=5)
+	qr.add_data(provisioning_uri)
+	qr.make(fit=True)
+	img = qr.make_image(fill_color="black", back_color="white")
+	img_io = BytesIO()
+	img.save(img_io, 'PNG')
+	img_io.seek(0)
+	img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+	return img_base64
+
+def verify_totp(secret: str, token: str, window: int = 1) -> bool:
+	"""Verify a TOTP token against the secret"""
+	if not secret or not token:
+		return False
+	try:
+		totp = pyotp.TOTP(secret)
+		return totp.verify(token, valid_window=window)
+	except Exception:
+		return False
+
+def enable_2fa(db_path: str, master_password: str, secret: str) -> None:
+	"""Enable 2FA for the user"""
+	_load_master_key(db_path, master_password)
+	
+	with _get_connection(db_path) as conn:
+		conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", ("2fa_enabled", "True"))
+		conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", ("2fa_secret", secret))
+
+def disable_2fa(db_path: str, master_password: str) -> None:
+	"""Disable 2FA for the user"""
+	_load_master_key(db_path, master_password)
+	
+	with _get_connection(db_path) as conn:
+		conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", ("2fa_enabled", "False"))
+		conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", ("2fa_secret", ""))
+
+def is_2fa_enabled(db_path: str) -> bool:
+	"""Check if 2FA is enabled for the user"""
+	try:
+		meta = _load_meta(db_path)
+		return meta.get("2fa_enabled", "False") == "True"
+	except Exception:
+		return False
+
+def get_2fa_secret(db_path: str) -> str:
+	"""Get the 2FA secret from the database"""
+	try:
+		meta = _load_meta(db_path)
+		return meta.get("2fa_secret", "")
+	except Exception:
+		return ""
 
 def add_entry(db_path: str, entry: Entry, master_password: str) -> None: #Add a new password entry to the database, encrypting the password and username using the tier-specific key derived from the master password
 	meta = _load_meta(db_path)

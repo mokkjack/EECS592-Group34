@@ -34,9 +34,15 @@ def login(): #Login page handler
                 backend.verify_master_password(DB_PATH, master_password)
             except RuntimeError as exc: #Raise an error if the master password is incorrect
                 error = str(exc)
-            else: #If the master password is correct, store it in the session and redirect to the main page
-                session["master_password"] = master_password #Store the master password in the session
-                return redirect(url_for("main")) #Redirect to the main page
+            else: #If the master password is correct, check if 2FA is enabled
+                if backend.is_2fa_enabled(DB_PATH):
+                    # 2FA is enabled, redirect to 2FA verification page
+                    session["master_password_temp"] = master_password
+                    return redirect(url_for("verify_2fa"))
+                else:
+                    # 2FA is not enabled, login directly
+                    session["master_password"] = master_password
+                    return redirect(url_for("main"))
     return render_template("login.html", error=error) #Render the login page with any error messages
 
 @app.route("/main") #Main page handler
@@ -56,8 +62,17 @@ def main(): #If the master password is not in the session, redirect to the login
     tier1_entries = [e for e in entries if e.get("tier") == "low"]
     tier2_entries = [e for e in entries if e.get("tier") == "medium"]
     tier3_entries = [e for e in entries if e.get("tier") == "high"]
-    return render_template("main.html", entries=entries, tier1_entries=tier1_entries, tier2_entries=tier2_entries, tier3_entries=tier3_entries) #Render the main page with the decrypted entries
-
+        
+    # Check if 2FA is enabled for viewing tier 2 and 3 entries
+    two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
+    if not two_fa_enabled:
+        tier2_entries = []  # Hide tier 2 entries if 2FA not enabled
+        tier3_entries = []  # Hide tier 3 entries if 2FA not enabled
+        if len([e for e in entries if e.get("tier") in ["medium", "high"]]) > 0:
+            flash("Tier 2 and 3 entries require 2FA to be enabled. Please enable 2FA in settings.")
+    
+    print(f"Tier1 entries: {[e['id'] for e in tier1_entries]}")
+    return render_template("main.html", entries=entries, tier1_entries=tier1_entries, tier2_entries=tier2_entries, tier3_entries=tier3_entries, two_fa_enabled=two_fa_enabled) #Render the main page with the decrypted entries
 @app.route("/signup", methods=["GET", "POST"]) #Signup page handler
 def signup(): #Signing up for a new master password
     error = None
@@ -150,6 +165,90 @@ def logout(): #Logout handler
     session.pop("master_password", None)
     return redirect(url_for("login"))
 
+@app.route("/verify-2fa", methods=["GET", "POST"])
+def verify_2fa():
+    """Verify 2FA token during login"""
+    if "master_password_temp" not in session:
+        return redirect(url_for("login"))
+    
+    error = None
+    if request.method == "POST":
+        totp_code = request.form.get("totp_code", "").strip()
+        if not totp_code:
+            error = "2FA code is required."
+        else:
+            secret = backend.get_2fa_secret(DB_PATH)
+            if backend.verify_totp(secret, totp_code):
+                # Verification successful, set the master password in session
+                session["master_password"] = session.pop("master_password_temp")
+                flash("2FA verification successful.")
+                return redirect(url_for("main"))
+            else:
+                error = "Invalid 2FA code. Please try again."
+    
+    return render_template("verify_2fa.html", error=error)
+
+@app.route("/setup-2fa", methods=["GET", "POST"])
+def setup_2fa():
+    """Setup 2FA for the user"""
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    if request.method == "POST":
+        # Generate a new secret and redirect to setup page
+        secret = backend.generate_2fa_secret()
+        session["2fa_secret_temp"] = secret
+        return redirect(url_for("confirm_2fa_setup"))
+    
+    return redirect(url_for("settings"))
+
+@app.route("/confirm-2fa-setup", methods=["GET", "POST"])
+def confirm_2fa_setup():
+    """Confirm 2FA setup with a verification code"""
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    if "2fa_secret_temp" not in session:
+        flash("2FA setup not initiated.")
+        return redirect(url_for("settings"))
+    
+    secret = session["2fa_secret_temp"]
+    error = None
+    
+    if request.method == "POST":
+        totp_code = request.form.get("totp_code", "").strip()
+        if not totp_code:
+            error = "2FA code is required."
+        else:
+            if backend.verify_totp(secret, totp_code):
+                # Verification successful, enable 2FA
+                try:
+                    backend.enable_2fa(DB_PATH, session["master_password"], secret)
+                    session.pop("2fa_secret_temp", None)
+                    flash("2FA has been successfully enabled!")
+                    return redirect(url_for("settings"))
+                except Exception as exc:
+                    error = f"Failed to enable 2FA: {str(exc)}"
+            else:
+                error = "Invalid 2FA code. Please try again."
+    
+    qr_code_base64 = backend.get_2fa_qr_code(secret)
+    return render_template("setup_2fa.html", qr_code=qr_code_base64, secret=secret, error=error)
+
+@app.route("/disable-2fa", methods=["POST"])
+def disable_2fa():
+    """Disable 2FA for the user"""
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    try:
+        backend.disable_2fa(DB_PATH, session["master_password"])
+        flash("2FA has been disabled.")
+    except Exception as exc:
+        flash(f"Failed to disable 2FA: {str(exc)}")
+    
+    return redirect(url_for("settings"))
+
 def _run_flask_server() -> None: #Create a function to run the Flask server
     server = make_server("127.0.0.1", 5000, app)
     server.serve_forever()
@@ -166,7 +265,8 @@ def _run_desktop() -> None: #Create a function to run the desktop application us
 def settings():
     if "master_password" not in session:
         return redirect(url_for("login"))
-    return render_template("settings.html")
+    two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
+    return render_template("settings.html", two_fa_enabled=two_fa_enabled)
 
 if __name__ == "__main__":
     _run_desktop()

@@ -42,7 +42,130 @@
                 <div class="form__field">
                     <input type="submit" value="Save Question" />
                 </div>
+            </form>
+        </details>
+        <div class="settings-container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="success">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
+        <div class="settings-section">
+            <h2>Two-Factor Authentication (2FA)</h2>
+            <p class="section-description">
+                Two-Factor Authentication adds an extra layer of security to your account.
+                Tier 2 and 3 password entries can only be accessed when 2FA is enabled.
+            </p>
+            
+            {% if two_fa_enabled %}
+                <div class="status-enabled">
+                    <strong>Status:</strong> ✓ 2FA is enabled
+                </div>
+                <form method="POST" action="{{ url_for('disable_2fa') }}" style="margin-top: 15px;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to disable 2FA? You will no longer be able to access Tier 2 and 3 entries.')">
+                        Disable 2FA
+                    </button>
+                </form>
+            {% else %}
+                <div class="status-disabled">
+                    <strong>Status:</strong> 2FA is not enabled
+                </div>
+                <p style="color: #d32f2f; margin: 10px 0;">
+                    ⚠️ Tier 2 and 3 entries are currently hidden. Set up 2FA to access them.
+                </p>
+                <form method="POST" action="{{ url_for('setup_2fa') }}" style="margin-top: 15px;">
+                    <button type="submit" class="btn btn-primary">
+                        Setup 2FA
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+            <style>
+        .settings-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .settings-section {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .settings-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .section-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 15px 0;
+        }
+
+        .status-enabled {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-disabled {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+    </style>
+    </div>
     </div>
     <a href="/main" class="main">Back to Account</a>
     </body>

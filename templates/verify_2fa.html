@@ -1,0 +1,117 @@
+<!--
+Name: verify_2fa.html
+Description: Template for 2FA verification during login
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify 2FA - Enclav3</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .verify-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .brand {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #bee5eb;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="brand">Enclav3</div>
+        <div class="subtitle">Two-Factor Authentication</div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <div class="info">
+            Enter the 6-digit code from your Google Authenticator app.
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="totp_code">Authenticator Code</label>
+                <input type="text" id="totp_code" name="totp_code" placeholder="000000" maxlength="6" required autofocus>
+            </div>
+            <input type="submit" value="Verify">
+        </form>
+    </div>
+</body>
+</html>
