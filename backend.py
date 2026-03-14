@@ -85,7 +85,40 @@ def _load_meta(db_path: str) -> dict[str, str]: #Load metadata from database
 
 	return meta
 
-def init_db(db_path: str, master_password: str) -> None: #Initialize the database with the master password and security tier
+
+#hashes the pin 
+def _hash_pin(pin: str, salt: bytes) -> bytes:
+	return pbkdf2_hmac("sha256", pin.encode("utf-8"), salt, 100_000)
+
+# verifies a PIN entered by the user against the stored hash in the database. This will be for tier 2/3 access. 
+def verify_pin(db_path: str, pin: str) -> bool:
+	meta = _load_meta(db_path)
+	if meta.get("pin_enabled") != "True":
+		return True  # PIN not setup skip check
+
+	pin_salt = base64.b64decode(meta["pin_salt"])
+	stored_hash = base64.b64decode(meta["pin_hash"])
+	computed = _hash_pin(pin, pin_salt)
+	return hmac.compare_digest(computed, stored_hash) #compare the computed hash with stored hash of pin.
+
+#hash the answer for security questions 
+def _hash_answer(answer: str, salt: bytes) -> bytes:
+	normalized = answer.strip().lower() 
+	return pbkdf2_hmac("sha256", normalized.encode("utf-8"), salt, 100_000)
+
+# verifies a challenge answer entered by the user against the stored hash. This will be for tier 2/3 access.
+def verify_challenge_answer(db_path: str, answer: str) -> bool:
+	meta = _load_meta(db_path)
+	if meta.get("challenge_enabled") != "True": # Challenge question not setup skip check
+		return True 
+
+	answer_salt = base64.b64decode(meta["challenge_answer_salt"])
+	stored_hash = base64.b64decode(meta["challenge_answer_hash"])
+	computed = _hash_answer(answer, answer_salt)
+	return hmac.compare_digest(computed, stored_hash) 
+
+def init_db(db_path: str, master_password: str, pin: Optional[str] = None, 
+            challenge_question: Optional[str] = None, challenge_answer: Optional[str] = None) -> None: #Initialize the database with the master password and security tier
 	if os.path.exists(db_path): #If the database already exists, raise an error to prevent overwriting existing data
 		raise RuntimeError("Database already exists.")
 
@@ -157,6 +190,31 @@ def init_db(db_path: str, master_password: str) -> None: #Initialize the databas
 				"INSERT INTO meta (key, value) VALUES (?, ?)",
 				(_tier_iterations_key(tier_name), str(TIER_ITERATIONS[tier_name])),
 			)
+		# PIN code 
+		pin_salt = os.urandom(16)
+		pin_hash = _hash_pin(pin, pin_salt) if pin else b""
+
+		#store the PIN salt, hash, and flag in meta table. 
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("pin_salt", base64.b64encode(pin_salt).decode()))
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("pin_hash", base64.b64encode(pin_hash).decode()))
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("pin_enabled", "True" if pin else "False"))
+  
+		# Challenge question
+		answer_salt = os.urandom(16)
+		answer_hash = _hash_answer(challenge_answer, answer_salt) if challenge_answer else b""
+
+		#store the challenge question, answer salt, answer hash, and flag in meta table.
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("challenge_question", challenge_question or ""))
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("challenge_answer_salt", base64.b64encode(answer_salt).decode()))
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("challenge_answer_hash", base64.b64encode(answer_hash).decode()))
+		conn.execute("INSERT INTO meta (key, value) VALUES (?, ?)",
+			("challenge_enabled", "True" if challenge_answer else "False"))
 
 def _verify_master_password(meta: dict[str, str], master_password: str) -> bytes:
 	try: #Extract the salt, iteration count, and verifier from the metadata, decoding them from base64 as needed
@@ -180,6 +238,20 @@ def _load_master_key(db_path: str, master_password: str) -> bytes:
 
 def verify_master_password(db_path: str, master_password: str) -> None: #Helper function to verify the master password by attempting to load the master key. If the master password is incorrect, this will raise an error from the _load_master_key function.
 	_load_master_key(db_path, master_password)
+
+def is_pin_enabled(db_path: str) -> bool:
+	try:
+		meta = _load_meta(db_path)
+		return meta.get("pin_enabled", "False") == "True"
+	except Exception:
+		return False
+
+def is_challenge_enabled(db_path: str) -> bool:
+	try:
+		meta = _load_meta(db_path)
+		return meta.get("challenge_enabled", "False") == "True"
+	except Exception:
+		return False
 
 def generate_2fa_secret() -> str:
 	"""Generate a new 2FA secret for Google Authenticator"""
@@ -241,6 +313,34 @@ def get_2fa_secret(db_path: str) -> str:
 	except Exception:
 		return ""
 
+def update_security_settings(db_path: str, master_password: str,
+                              pin: Optional[str] = None,
+                              challenge_question: Optional[str] = None,
+                              challenge_answer: Optional[str] = None) -> None:
+	_load_master_key(db_path, master_password)
+
+	with _get_connection(db_path) as conn:
+		if pin is not None:
+			pin_salt = os.urandom(16)
+			pin_hash = _hash_pin(pin, pin_salt)
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("pin_salt", base64.b64encode(pin_salt).decode()))
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("pin_hash", base64.b64encode(pin_hash).decode()))
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("pin_enabled", "True"))
+
+		if challenge_question and challenge_answer:
+			answer_salt = os.urandom(16)
+			answer_hash = _hash_answer(challenge_answer, answer_salt)
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("challenge_question", challenge_question))
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("challenge_answer_salt", base64.b64encode(answer_salt).decode()))
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("challenge_answer_hash", base64.b64encode(answer_hash).decode()))
+			conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+				("challenge_enabled", "True"))
 def add_entry(db_path: str, entry: Entry, master_password: str) -> None: #Add a new password entry to the database, encrypting the password and username using the tier-specific key derived from the master password
 	meta = _load_meta(db_path)
 	

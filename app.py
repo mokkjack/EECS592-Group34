@@ -160,6 +160,56 @@ def edit_entry(entry_id: int): #edit password entry handler
         flash("Entry updated.")
     return redirect(url_for("main"))
 
+#route for setting up a PIN code for quick access to the application, stored securely in the database
+@app.route("/setup-pin", methods=["POST"])
+def setup_pin():
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    pin = request.form.get("pin", "").strip() # get the PIN from the form and strip whitespace
+    confirm_pin = request.form.get("confirm_pin", "").strip()  # get the confirm PIN from the form
+
+    if not pin:
+        flash("PIN is required.")
+        return redirect(url_for("settings"))
+
+    if pin != confirm_pin:  # if the two PIN fields don't match flash an error and redirect back to settings
+        flash("PINs do not match.")
+        return redirect(url_for("settings"))
+    
+    # save the PIN using the backend function, which hashes it before storing
+    try:
+        backend.update_security_settings(DB_PATH, session["master_password"], pin=pin)
+        flash("PIN set up successfully.")
+    except RuntimeError as exc:
+        flash(str(exc))
+    
+    return redirect(url_for("settings"))
+
+#route for setting up challenge question and answer for account recovery
+@app.route("/setup-challenge", methods=["POST"])
+def setup_challenge():
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    question = request.form.get("challenge_question", "").strip()
+    answer = request.form.get("challenge_answer", "").strip()
+    
+    if not question or not answer:
+        flash("Both a question and answer are required.")
+        return redirect(url_for("settings"))
+    
+    # save the question and hashed answer using the backend function
+    try:
+        backend.update_security_settings(DB_PATH, session["master_password"], 
+                                         challenge_question=question, 
+                                         challenge_answer=answer)
+        flash("Challenge question set up successfully.")
+    except RuntimeError as exc:
+        flash(str(exc))
+    
+    return redirect(url_for("settings"))
+
 @app.route("/logout")
 def logout(): #Logout handler
     session.pop("master_password", None)
@@ -266,7 +316,10 @@ def settings():
     if "master_password" not in session:
         return redirect(url_for("login"))
     two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
-    return render_template("settings.html", two_fa_enabled=two_fa_enabled)
+    pin_enabled = backend.is_pin_enabled(DB_PATH)
+    challenge_enabled = backend.is_challenge_enabled(DB_PATH)
+    return render_template("settings.html", two_fa_enabled=two_fa_enabled,
+                           pin_enabled=pin_enabled, challenge_enabled=challenge_enabled)
 
 if __name__ == "__main__":
     _run_desktop()

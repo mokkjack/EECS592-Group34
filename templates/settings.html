@@ -9,6 +9,11 @@
         <!-- PIN Setup -->
         <details class="settings_group">
             <summary class="settings_summary">🔢 Set Up Security PIN</summary>
+            {% if pin_enabled %}
+                <div class="status-enabled"><strong>Status:</strong> ✓ PIN is set up</div>
+            {% else %}
+                <div class="status-disabled"><strong>Status:</strong> PIN not set up</div>
+            {% endif %}
             <form method="POST" action="/setup-pin">
                 <div class="form__field">
                     <input type="password" name="pin" placeholder="Enter PIN (6+ digits)" pattern="\d{6,}" required />
@@ -25,25 +30,31 @@
         <!-- Challenge Question Setup -->
         <details class="settings_group">
             <summary class="settings_summary">🔐 Set Up Challenge Question</summary>
+            {% if challenge_enabled %}
+                <div class="status-enabled"><strong>Status:</strong> ✓ Challenge question is set up</div>
+            {% else %}
+                <div class="status-disabled"><strong>Status:</strong> Challenge question not set up</div>
+            {% endif %}
             <form method="POST" action="/setup-challenge">
                 <div class="form__field">
-                    <select name="question" class="settings_select">
+                    <select name="challenge_question" class="settings_select">
                         <option value="">-- Choose a question --</option>
-                        <option value="maiden">What is your mother's maiden name?</option>
-                        <option value="street">What street did you grow up on?</option>
-                        <option value="pet">What was your first pet's name?</option>
-                        <option value="school">What was the name of your elementary school?</option>
-                        <option value="city">In what city were you born?</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What street did you grow up on?">What street did you grow up on?</option>
+                        <option value="What was your first pet's name?">What was your first pet's name?</option>
+                        <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+                        <option value="In what city were you born?">In what city were you born?</option>
                     </select>
                 </div>
                 <div class="form__field">
-                    <input type="text" name="answer" placeholder="Your answer" required />
+                    <input type="text" name="challenge_answer" placeholder="Your answer" required />
                 </div>
                 <div class="form__field">
                     <input type="submit" value="Save Question" />
                 </div>
             </form>
         </details>
+       
         <div class="settings-container">
         {% with messages = get_flashed_messages() %}
           {% if messages %}
