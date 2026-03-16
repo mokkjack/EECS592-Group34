@@ -514,3 +514,278 @@ p {
 .edit_cancel_button:hover {
   background: rgba(255,255,255,0.05);
 }
+/* ============================================================
+   Vault
+   ============================================================ */
+
+/* Wrapper — positioning context for the lock overlay */
+.vault_wrapper {
+  position: relative;
+  margin: 20px 0;
+  border-radius: 16px;
+}
+
+/* Greyed-out content when locked */
+.vault_wrapper.vault_locked .vault_section {
+  filter: grayscale(1);
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Lock overlay */
+.vault_lock_overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(30, 40, 55, 0.6);
+  border-radius: 16px;
+  backdrop-filter: blur(2px);
+  cursor: default;
+}
+
+.vault_lock_icon {
+  font-size: 28px;
+}
+
+.vault_lock_msg {
+  font-size: 13px;
+  font-weight: 600;
+  color: #7e8ba3;
+  text-align: center;
+}
+
+/* Vault panel */
+.vault_section {
+  border: 1px solid #242c37;
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.vault_header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.vault_title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #8ceabb;
+  letter-spacing: 1px;
+}
+
+.vault_subtitle {
+  font-size: 12px;
+  color: #7e8ba3;
+  flex: 1;
+}
+
+.vault_upload_toggle {
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #8ceabb;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault_upload_toggle:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+/* Upload form */
+.vault_upload_form {
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed #2e3a4a;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.vault_form_row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.vault_file_label {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.vault_file_label:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.vault_file_chosen {
+  font-size: 12px;
+  color: #7e8ba3;
+}
+
+.vault_notes_input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.vault_notes_input::placeholder {
+  color: #7e8ba3;
+}
+
+.vault_submit {
+  padding: 0.4rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.vault_submit:hover {
+  opacity: 0.9;
+}
+
+.vault_cancel {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #7e8ba3;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault_cancel:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* File list */
+.vault_file_list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vault_file_card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #242c37;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.vault_file_card:hover {
+  background: rgba(255,255,255,0.07);
+  transform: translateY(-2px);
+}
+
+.vault_file_icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.vault_file_info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vault_file_name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vault_file_notes {
+  font-size: 12px;
+  color: #7e8ba3;
+}
+
+.vault_file_date {
+  font-size: 11px;
+  color: #4e5d6e;
+}
+
+.vault_file_actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.vault_download_btn {
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #242c37;
+  background: transparent;
+  color: #8ceabb;
+  font-size: 12px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault_download_btn:hover {
+  background: rgba(140,234,187,0.1);
+}
+
+.vault_empty {
+  color: #4e5d6e;
+  font-size: 13px;
+  margin: 4px 0 0 0;
+}
+
+/* Disabled tier labels (2FA not enabled) */
+.tier_disabled_label {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tier_lock_hint {
+  font-size: 11px;
+  color: #7e8ba3;
+  margin-left: 4px;
+}

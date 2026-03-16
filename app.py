@@ -11,8 +11,10 @@ import threading
 import time
 
 import webview
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from werkzeug.serving import make_server
+from io import BytesIO
+import mimetypes
 
 import backend
 from backend import Entry
@@ -20,7 +22,31 @@ from backend import Entry
 app = Flask(__name__)
 app.secret_key = "dev-secret-key"
 
+# Jinja2 filter: map a filename extension to a display emoji
+def _vault_icon(filename: str) -> str:
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    icons = {
+        "pdf": "📄", "doc": "📝", "docx": "📝", "xls": "📊", "xlsx": "📊",
+        "ppt": "📑", "pptx": "📑", "txt": "📃", "md": "📃", "csv": "📊",
+        "json": "🗂️", "xml": "🗂️", "zip": "📦", "tar": "📦", "gz": "📦",
+        "png": "🖼️", "jpg": "🖼️", "jpeg": "🖼️", "gif": "🖼️",
+        "webp": "🖼️", "bmp": "🖼️",
+        "mp4": "🎬", "mov": "🎬", "mp3": "🎵", "wav": "🎵",
+    }
+    return icons.get(ext, "📁")
+
+app.jinja_env.filters["vault_icon"] = _vault_icon
+
 DB_PATH = backend.DEFAULT_DB
+
+# ---------------------------------------------------------------------------
+# Ensure the vault_files table exists even on databases created before the
+# vault feature was added.
+# ---------------------------------------------------------------------------
+try:
+    backend.migrate_add_vault_table(DB_PATH)
+except Exception:
+    pass  # DB may not exist yet (first run); init_db will create the table.
 
 @app.route("/", methods=["GET", "POST"]) # Login page
 def login(): #Login page handler
@@ -65,6 +91,17 @@ def main(): #If the master password is not in the session, redirect to the login
         
     # Check if 2FA is enabled for viewing tier 2 and 3 entries
     two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
+    vault_files = []
+    if two_fa_enabled:
+        try:
+            backend.migrate_add_vault_table(DB_PATH)
+            vault_files = backend.list_vault_files(DB_PATH, session["master_password"])
+            print(f"[vault] loaded {len(vault_files)} file(s)")
+        except Exception as exc:
+            print(f"[vault] ERROR loading files: {exc}")
+            flash(f"Vault error: {exc}")
+            vault_files = []
+
     if not two_fa_enabled:
         tier2_entries = []  # Hide tier 2 entries if 2FA not enabled
         tier3_entries = []  # Hide tier 3 entries if 2FA not enabled
@@ -72,7 +109,10 @@ def main(): #If the master password is not in the session, redirect to the login
             flash("Tier 2 and 3 entries require 2FA to be enabled. Please enable 2FA in settings.")
     
     print(f"Tier1 entries: {[e['id'] for e in tier1_entries]}")
-    return render_template("main.html", entries=entries, tier1_entries=tier1_entries, tier2_entries=tier2_entries, tier3_entries=tier3_entries, two_fa_enabled=two_fa_enabled) #Render the main page with the decrypted entries
+    return render_template("main.html", entries=entries, tier1_entries=tier1_entries,
+                           tier2_entries=tier2_entries, tier3_entries=tier3_entries,
+                           two_fa_enabled=two_fa_enabled, vault_files=vault_files,
+                           sort=sort) #Render the main page with the decrypted entries
 @app.route("/signup", methods=["GET", "POST"]) #Signup page handler
 def signup(): #Signing up for a new master password
     error = None
@@ -298,6 +338,104 @@ def disable_2fa():
         flash(f"Failed to disable 2FA: {str(exc)}")
     
     return redirect(url_for("settings"))
+
+# ---------------------------------------------------------------------------
+# Vault routes – only accessible when 2FA is enabled (same gate as Tier 3)
+# ---------------------------------------------------------------------------
+
+# 50 MB max upload size
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+
+ALLOWED_EXTENSIONS = {
+    "png", "jpg", "jpeg", "gif", "webp", "bmp",  # images
+    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",  # documents
+    "txt", "md", "csv", "json", "xml",  # text
+    "zip", "tar", "gz",  # archives
+    "mp4", "mov", "mp3", "wav",  # media
+}
+
+
+def _allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route("/vault/upload", methods=["POST"])
+def vault_upload():
+    """Upload and encrypt a file into the Tier-3 vault."""
+    master_password = session.get("master_password")
+    if not master_password:
+        return redirect(url_for("login"))
+    if not backend.is_2fa_enabled(DB_PATH):
+        flash("Vault requires 2FA to be enabled.")
+        return redirect(url_for("main"))
+
+    file = request.files.get("vault_file")
+    notes = request.form.get("vault_notes", "").strip() or None
+
+    if not file or file.filename == "":
+        flash("No file selected.")
+        return redirect(url_for("main"))
+    if not _allowed_file(file.filename):
+        flash("File type not allowed.")
+        return redirect(url_for("main"))
+
+    filename = file.filename
+    file_bytes = file.read()
+    mime_type = file.content_type or mimetypes.guess_type(filename)[0] or "application/octet-stream"
+
+    try:
+        backend.add_vault_file(DB_PATH, master_password, filename, mime_type, file_bytes, notes)
+        print(f"[vault] saved '{filename}' ({len(file_bytes)} bytes)")
+        flash(f"'{filename}' added to vault.")
+    except Exception as exc:
+        print(f"[vault] upload ERROR: {exc}")
+        flash(f"Vault upload error: {exc}")
+
+    return redirect(url_for("main") + "#tier3")
+
+
+@app.route("/vault/download/<int:file_id>")
+def vault_download(file_id: int):
+    """Decrypt and stream a vault file back to the user."""
+    master_password = session.get("master_password")
+    if not master_password:
+        return redirect(url_for("login"))
+    if not backend.is_2fa_enabled(DB_PATH):
+        flash("Vault requires 2FA to be enabled.")
+        return redirect(url_for("main"))
+
+    try:
+        vault_file = backend.get_vault_file(DB_PATH, master_password, file_id)
+    except RuntimeError as exc:
+        flash(str(exc))
+        return redirect(url_for("main"))
+
+    return send_file(
+        BytesIO(vault_file["file_bytes"]),
+        mimetype=vault_file["mime_type"],
+        as_attachment=True,
+        download_name=vault_file["filename"],
+    )
+
+
+@app.route("/vault/delete/<int:file_id>", methods=["POST"])
+def vault_delete(file_id: int):
+    """Delete a vault file."""
+    master_password = session.get("master_password")
+    if not master_password:
+        return redirect(url_for("login"))
+    if not backend.is_2fa_enabled(DB_PATH):
+        flash("Vault requires 2FA to be enabled.")
+        return redirect(url_for("main"))
+
+    try:
+        backend.delete_vault_file(DB_PATH, master_password, file_id)
+        flash("Vault file deleted.")
+    except RuntimeError as exc:
+        flash(str(exc))
+
+    return redirect(url_for("main") + "#tier3")
+
 
 def _run_flask_server() -> None: #Create a function to run the Flask server
     server = make_server("127.0.0.1", 5000, app)

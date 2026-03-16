@@ -51,6 +51,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         onchange="this.form.submit()">
                         <label for = "oldest">Oldest First</label> 
                 </div>
+            </form>
             
             <div class="button">
                 <button type="button" id="toggleAllTiers">Show All</button>
@@ -137,6 +138,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         <p class="empty_tier">No Tier 1 passwords yet.</p>
                         {% endfor %}
                     </div>
+
                 </details>
 
                 <!-- TIER 2 -->
@@ -295,6 +297,7 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         <p class="empty_tier">No Tier 3 passwords yet.</p>
                         {% endfor %}
                     </div>
+
                 </details>
 
             </div> <!-- end tier_groups -->
@@ -302,6 +305,72 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
             {% else %}
             <div class="subtitle">No passwords yet. Add your first one below.</div>
             {% endif %}
+
+            <!-- ===== VAULT — always visible, unlocks when Tier 1 is selected ===== -->
+            <div class="vault_wrapper" id="vaultWrapper">
+                <!-- lock overlay — sits on top when locked -->
+                <div class="vault_lock_overlay" id="vaultLockOverlay">
+                    <span class="vault_lock_icon">🔒</span>
+                    <span class="vault_lock_msg">Select Tier 3 to access the Vault</span>
+                </div>
+
+                <div class="vault_section">
+                    <div class="vault_header">
+                        <span class="vault_title">🗄️ Vault</span>
+                        <span class="vault_subtitle">Files encrypted with Tier&nbsp;3 key</span>
+                        <button type="button" class="vault_upload_toggle" id="vaultUploadToggle">+ Add File</button>
+                    </div>
+
+                    <!-- Upload form (hidden by default) -->
+                    <div class="vault_upload_form" id="vaultUploadForm" style="display:none;">
+                        <form method="POST" action="{{ url_for('vault_upload') }}" enctype="multipart/form-data">
+                            <div class="vault_form_row">
+                                <label class="vault_file_label" for="vault_file_input">Choose file</label>
+                                <input type="file" id="vault_file_input" name="vault_file" required
+                                       onchange="document.getElementById('vault_file_name').textContent = this.files[0]?.name || 'No file chosen'">
+                                <span class="vault_file_chosen" id="vault_file_name">No file chosen</span>
+                            </div>
+                            <div class="vault_form_row">
+                                <input type="text" name="vault_notes" placeholder="Notes (optional)" class="vault_notes_input" />
+                            </div>
+                            <div class="vault_form_row">
+                                <input type="submit" value="Encrypt &amp; Upload" class="vault_submit" />
+                                <button type="button" class="vault_cancel" id="vaultUploadCancel">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- File list -->
+                    {% if vault_files %}
+                    <div class="vault_file_list">
+                        {% for vf in vault_files %}
+                        <div class="vault_file_card">
+                            <span class="vault_file_icon">{{ vf.filename | vault_icon }}</span>
+                            <div class="vault_file_info">
+                                <span class="vault_file_name">{{ vf.filename }}</span>
+                                {% if vf.notes %}
+                                <span class="vault_file_notes">{{ vf.notes }}</span>
+                                {% endif %}
+                                <span class="vault_file_date">{{ vf.created_at }}</span>
+                            </div>
+                            <div class="vault_file_actions">
+                                <a href="{{ url_for('vault_download', file_id=vf.id) }}"
+                                   class="vault_download_btn">⬇️ Download</a>
+                                <form method="POST" action="{{ url_for('vault_delete', file_id=vf.id) }}"
+                                      style="display:inline;">
+                                    <button type="submit" class="delete_button" title="Delete"
+                                            onclick="return confirm('Permanently delete this vault file?')">🗑️</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="vault_empty">No files in vault yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- ===== END VAULT ===== -->
 
             <form class="form" method="POST" action="/add-entry">
                             
@@ -333,12 +402,18 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                             <label for ="tier_low">Tier 1</label>
                         </div>
                         <div class="radio_option">
-                            <input type="radio" id="tier_medium" name="option" value="medium"> 
-                            <label for ="tier_medium">Tier 2</label>
+                            <input type="radio" id="tier_medium" name="option" value="medium"
+                                {{ 'disabled' if not two_fa_enabled else '' }}>
+                            <label for="tier_medium" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
+                                Tier 2 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
+                            </label>
                         </div>
                         <div class="radio_option">
-                            <input type="radio" id="tier_high" name="option" value="high"> 
-                            <label for ="tier_high">Tier 3</label>
+                            <input type="radio" id="tier_high" name="option" value="high"
+                                {{ 'disabled' if not two_fa_enabled else '' }}>
+                            <label for="tier_high" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
+                                Tier 3 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
+                            </label>
                         </div>
                     </div>      
                 </div>
@@ -480,7 +555,55 @@ document.getElementById("closeEditModel").addEventListener("click", () => {
 });
 </script>
 
-</body>
+<script>
+// Vault upload form toggle
+const vaultToggle = document.getElementById("vaultUploadToggle");
+const vaultForm   = document.getElementById("vaultUploadForm");
+const vaultCancel = document.getElementById("vaultUploadCancel");
+if (vaultToggle) {
+    vaultToggle.addEventListener("click", () => {
+        vaultForm.style.display = vaultForm.style.display === "none" ? "block" : "none";
+        vaultToggle.textContent = vaultForm.style.display === "none" ? "+ Add File" : "– Hide";
+    });
+}
+if (vaultCancel) {
+    vaultCancel.addEventListener("click", () => {
+        vaultForm.style.display = "none";
+        vaultToggle.textContent = "+ Add File";
+    });
+}
 
+// Unlock vault when Tier 3 radio is selected, lock otherwise
+function updateVaultLock() {
+    const overlay = document.getElementById("vaultLockOverlay");
+    const wrapper = document.getElementById("vaultWrapper");
+    if (!overlay || !wrapper) return;
+    const tier3Selected = document.getElementById("tier_high")?.checked;
+    const twoFaEnabled = {{ 'true' if two_fa_enabled else 'false' }};
+    if (tier3Selected && twoFaEnabled) {
+        overlay.style.display = "none";
+        wrapper.classList.remove("vault_locked");
+    } else {
+        overlay.style.display = "flex";
+        wrapper.classList.add("vault_locked");
+        if (!twoFaEnabled) {
+            const msg = overlay.querySelector(".vault_lock_msg");
+            if (msg) msg.textContent = "Enable 2FA in Settings to access the Vault";
+        } else {
+            const msg = overlay.querySelector(".vault_lock_msg");
+            if (msg) msg.textContent = "Select Tier 3 to access the Vault";
+        }
+    }
+}
+
+// Run on page load and whenever a tier radio changes
+document.addEventListener("DOMContentLoaded", () => {
+    updateVaultLock();
+    document.querySelectorAll("input[name='option']").forEach(r => {
+        r.addEventListener("change", updateVaultLock);
+    });
+});
+</script>
+</body>
 
 </html>

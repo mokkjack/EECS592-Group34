@@ -143,6 +143,15 @@ def init_db(db_path: str, master_password: str, pin: Optional[str] = None,
 				created_at TEXT NOT NULL,
 				tier TEXT NOT NULL DEFAULT 'low'
 			);
+
+			CREATE TABLE vault_files (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				filename TEXT NOT NULL,
+				mime_type TEXT NOT NULL,
+				file_data_enc TEXT NOT NULL,
+				notes TEXT,
+				created_at TEXT NOT NULL
+			);
 			"""
 		)
 
@@ -455,6 +464,106 @@ def edit_entry(db_path: str, master_password: str, entry_id: int, site: Optional
 		)
 		if cur.rowcount == 0:
 			print("Entry not found.")
+
+
+# ---------------------------------------------------------------------------
+# Vault file functions – files are always encrypted at the "high" (Tier 3)
+# security level, so they share the same encryption strength as Tier 3 passwords.
+# ---------------------------------------------------------------------------
+
+def _vault_cipher(db_path: str, master_password: str) -> "Fernet":
+	"""Return a Fernet cipher keyed with the Tier-3 (high) derived key."""
+	meta = _load_meta(db_path)
+	tier_salt = base64.b64decode(meta[_tier_salt_key("high")])
+	tier_iterations = int(meta[_tier_iterations_key("high")])
+	encryption_key = _derive_key(master_password, tier_salt, tier_iterations)
+	return Fernet(encryption_key)
+
+
+def add_vault_file(db_path: str, master_password: str, filename: str,
+                   mime_type: str, file_bytes: bytes, notes: Optional[str] = None) -> None:
+	"""Encrypt and store a file in the vault (always Tier-3 encryption)."""
+	_load_master_key(db_path, master_password)  # verify master password first
+	cipher = _vault_cipher(db_path, master_password)
+	encrypted_data = cipher.encrypt(file_bytes).decode("utf-8")
+	with _get_connection(db_path) as conn:
+		conn.execute(
+			"""
+			INSERT INTO vault_files (filename, mime_type, file_data_enc, notes, created_at)
+			VALUES (?, ?, ?, ?, ?)
+			""",
+			(filename, mime_type, encrypted_data, notes, _utc_now()),
+		)
+
+
+def list_vault_files(db_path: str, master_password: str) -> list[dict]:
+	"""Return metadata for all vault files (no decrypted binary data)."""
+	_load_master_key(db_path, master_password)
+	with _get_connection(db_path) as conn:
+		rows = conn.execute(
+			"SELECT id, filename, mime_type, notes, created_at FROM vault_files ORDER BY created_at DESC"
+		).fetchall()
+	return [
+		{"id": str(r[0]), "filename": r[1], "mime_type": r[2],
+		 "notes": r[3] or "", "created_at": r[4]}
+		for r in rows
+	]
+
+
+def get_vault_file(db_path: str, master_password: str, file_id: int) -> dict:
+	"""Decrypt and return a vault file's bytes plus metadata."""
+	_load_master_key(db_path, master_password)
+	with _get_connection(db_path) as conn:
+		row = conn.execute(
+			"SELECT filename, mime_type, file_data_enc, notes FROM vault_files WHERE id = ?",
+			(file_id,),
+		).fetchone()
+	if row is None:
+		raise RuntimeError("Vault file not found.")
+	filename, mime_type, file_data_enc, notes = row
+	cipher = _vault_cipher(db_path, master_password)
+	try:
+		file_bytes = cipher.decrypt(file_data_enc.encode("utf-8"))
+	except (InvalidToken, Exception) as exc:
+		raise RuntimeError("Unable to decrypt vault file – wrong master password?") from exc
+	return {"filename": filename, "mime_type": mime_type,
+	        "file_bytes": file_bytes, "notes": notes or ""}
+
+
+def delete_vault_file(db_path: str, master_password: str, file_id: int) -> None:
+	"""Delete a vault file by ID."""
+	_load_master_key(db_path, master_password)
+	with _get_connection(db_path) as conn:
+		cur = conn.execute("DELETE FROM vault_files WHERE id = ?", (file_id,))
+		if cur.rowcount == 0:
+			raise RuntimeError("Vault file not found.")
+
+
+def migrate_add_vault_table(db_path: str) -> None:
+	"""Idempotently add the vault_files table to an existing, initialized database.
+	Does nothing if the database file doesn't exist or hasn't been initialized yet."""
+	if not os.path.exists(db_path):
+		return  # DB not created yet; init_db will create the table instead
+	with _get_connection(db_path) as conn:
+		# Only migrate if the DB has already been initialized (meta table exists)
+		has_meta = conn.execute(
+			"SELECT name FROM sqlite_master WHERE type='table' AND name='meta'"
+		).fetchone()
+		if not has_meta:
+			return  # Empty/uninitialized file — leave it alone
+		conn.execute(
+			"""
+			CREATE TABLE IF NOT EXISTS vault_files (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				filename TEXT NOT NULL,
+				mime_type TEXT NOT NULL,
+				file_data_enc TEXT NOT NULL,
+				notes TEXT,
+				created_at TEXT NOT NULL
+			)
+			"""
+		)
+
 
 def _prompt_master_password(confirm: bool = False) -> str: 
 	#Helper function to prompt the user for the master password
