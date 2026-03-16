@@ -51,7 +51,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                         onchange="this.form.submit()">
                         <label for = "oldest">Oldest First</label> 
                 </div>
-            </form>
             
             <div class="button">
                 <button type="button" id="toggleAllTiers">Show All</button>
@@ -310,7 +309,6 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
             <div class="vault_wrapper" id="vaultWrapper">
                 <!-- lock overlay — sits on top when locked -->
                 <div class="vault_lock_overlay" id="vaultLockOverlay">
-                    <span class="vault_lock_icon">🔒</span>
                     <span class="vault_lock_msg">Select Tier 3 to access the Vault</span>
                 </div>
 
@@ -402,18 +400,12 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
                             <label for ="tier_low">Tier 1</label>
                         </div>
                         <div class="radio_option">
-                            <input type="radio" id="tier_medium" name="option" value="medium"
-                                {{ 'disabled' if not two_fa_enabled else '' }}>
-                            <label for="tier_medium" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
-                                Tier 2 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
-                            </label>
+                            <input type="radio" id="tier_medium" name="option" value="medium">
+                            <label for="tier_medium">Tier 2</label>
                         </div>
                         <div class="radio_option">
-                            <input type="radio" id="tier_high" name="option" value="high"
-                                {{ 'disabled' if not two_fa_enabled else '' }}>
-                            <label for="tier_high" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
-                                Tier 3 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
-                            </label>
+                            <input type="radio" id="tier_high" name="option" value="high">
+                            <label for="tier_high">Tier 3</label>
                         </div>
                     </div>      
                 </div>
@@ -573,27 +565,14 @@ if (vaultCancel) {
     });
 }
 
-// Unlock vault when Tier 3 radio is selected, lock otherwise
+// Show vault overlay when Tier 3 is not selected
 function updateVaultLock() {
     const overlay = document.getElementById("vaultLockOverlay");
-    const wrapper = document.getElementById("vaultWrapper");
-    if (!overlay || !wrapper) return;
+    if (!overlay) return;
     const tier3Selected = document.getElementById("tier_high")?.checked;
-    const twoFaEnabled = {{ 'true' if two_fa_enabled else 'false' }};
-    if (tier3Selected && twoFaEnabled) {
-        overlay.style.display = "none";
-        wrapper.classList.remove("vault_locked");
-    } else {
-        overlay.style.display = "flex";
-        wrapper.classList.add("vault_locked");
-        if (!twoFaEnabled) {
-            const msg = overlay.querySelector(".vault_lock_msg");
-            if (msg) msg.textContent = "Enable 2FA in Settings to access the Vault";
-        } else {
-            const msg = overlay.querySelector(".vault_lock_msg");
-            if (msg) msg.textContent = "Select Tier 3 to access the Vault";
-        }
-    }
+    overlay.style.display = tier3Selected ? "none" : "flex";
+    const msg = overlay.querySelector(".vault_lock_msg");
+    if (msg) msg.textContent = "Select Tier 3 to access the Vault";
 }
 
 // Run on page load and whenever a tier radio changes
