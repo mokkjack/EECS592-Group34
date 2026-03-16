@@ -1,44 +1,107 @@
 <!--
-Name: login.html
-Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
-Description: This file contains the HTML template for the login page of the Enclav3 application. 
-It defines the structure and layout of the login page, including a form for entering the master password.
-Inputs: Master password
-Outputs: Rendered HTML page for login, redirect to main page on successful login, and error message if password is incorrect
---> 
+Name: signup.html
+Authors: Jack Morice, Nick Greico, Gunther Luechtefield
+Description: This file contains the HTML template for the signup page of the Enclav3 application. 
+It defines the structure and layout of the signup page, including a form for creating a master password.
+Inputs: Master password and password confirmation
+Outputs: Rendered HTML page for signup, redirect back to login page on successful signup, and error message if passwords do not match
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Enclav3 Master Login</title>
+<title>Create Master Password</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
-
 </head>
-
 
 <body class="align">
 
-  <div class="grid">
-    <div class="register">
+	<div class="grid">
+		<div class="register">
 
-      <div class="brand">Enclav3</div>
-      <div class="subtitle">Enter your master password</div>
+			<div class="brand">Enclav3</div>
+			<div class="subtitle">Create your master password</div>
+			
+			<form class="form" method="POST" action="/signup">
+				<div class="form__field">
+					<input type="password" name="master_password" id="master_password" placeholder="Master password" required />
+				</div>
 
-      <form class="form" method="POST" action="/">
-        <div class="form__field">
-          <input type="password" name="master_password" placeholder="Master password" required />
-        </div>
+				<!-- Live requirements checklist -->
+				<div class="req_list" id="req_list">
+					<div class="req" id="req_length">✗ At least 12 characters</div>
+					<div class="req" id="req_upper">✗ One uppercase letter</div>
+					<div class="req" id="req_lower">✗ One lowercase letter</div>
+					<div class="req" id="req_number">✗ One number</div>
+					<div class="req" id="req_special">✗ One special character</div>
+				</div>
 
-        <div class="form__field">
-          <input type="submit" value="Unlock" />
-        </div>
-      </form>
+				<div class="form__field">
+					<input type="password" name="confirm_master_password" placeholder="Confirm master password" required />
+				</div>
+				<div class="form__field">
+					<input type="submit" value="Create" />
+				</div>
+			</form>
 
-      <a href="/signup" class="secondary">First time? Create a master password.</a>
+			{% if error %}
+				<div class="error">{{ error }}</div>
+			{% endif %}
 
-    </div>
-  </div>
+			<a href="/" class="secondary">Back to login</a>
+
+		</div>
+	</div>
+
+<style>
+.req_list {
+	text-align: left;
+	margin: -0.5rem 0 1rem 0;
+	padding: 0.75rem 1rem;
+	border-radius: 10px;
+	border: 1px solid #242c37;
+	background: rgba(255,255,255,0.03);
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+.req {
+	font-size: 12px;
+	color: #7e8ba3;
+	transition: color 0.2s ease;
+}
+.req.met {
+	color: #8ceabb;
+}
+</style>
+
+<script>
+const input = document.getElementById("master_password");
+const checks = {
+	req_length:  p => p.length >= 12,
+	req_upper:   p => /[A-Z]/.test(p),
+	req_lower:   p => /[a-z]/.test(p),
+	req_number:  p => /[0-9]/.test(p),
+	req_special: p => /[!@#$%^&*()\-_=+\[\]{}|;':",./<>?]/.test(p),
+};
+const labels = {
+	req_length:  ["✗ At least 12 characters",  "✓ At least 12 characters"],
+	req_upper:   ["✗ One uppercase letter",     "✓ One uppercase letter"],
+	req_lower:   ["✗ One lowercase letter",     "✓ One lowercase letter"],
+	req_number:  ["✗ One number",               "✓ One number"],
+	req_special: ["✗ One special character",    "✓ One special character"],
+};
+input.addEventListener("input", () => {
+	const p = input.value;
+	for (const [id, fn] of Object.entries(checks)) {
+		const el = document.getElementById(id);
+		const met = fn(p);
+		el.textContent = labels[id][met ? 1 : 0];
+		el.classList.toggle("met", met);
+	}
+});
+</script>
 
 </body>
 </html>

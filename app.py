@@ -121,6 +121,16 @@ def signup(): #Signing up for a new master password
         confirm = request.form.get("confirm_master_password", "").strip() #Get the confirm master password from the form and strip whitespace
         if not master_password: #handling empty password
             error = "Master password is required."
+        elif len(master_password) < 12:
+            error = "Password must be at least 12 characters."
+        elif not any(c.isupper() for c in master_password):
+            error = "Password must contain at least one uppercase letter."
+        elif not any(c.islower() for c in master_password):
+            error = "Password must contain at least one lowercase letter."
+        elif not any(c.isdigit() for c in master_password):
+            error = "Password must contain at least one number."
+        elif not any(c in "!@#$%^&*()_+-=[]{}|;':\",./<>?" for c in master_password):
+            error = "Password must contain at least one special character."
         elif master_password != confirm: #handling password confirmation mismatch
             error = "Passwords do not match." #Error handling
         else: #If the master password is valid and matches the confirmation, try to initialize the database with the new master password
