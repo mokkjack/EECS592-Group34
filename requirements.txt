@@ -1,3 +1,5 @@
 cryptography>=41.0.0
 flask>=2.2.0
 pywebview>=5.0
+pyotp>=2.9.0
+qrcode[pil]>=7.4.0
