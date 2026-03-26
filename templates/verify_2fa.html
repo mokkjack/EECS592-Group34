@@ -7,6 +7,14 @@ Description: Template for 2FA verification during login
 <head>
     <title>Verify 2FA - Enclav3</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <script>
+      (function() {
+        var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
+        var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+        document.documentElement.style.setProperty('--accent', a);
+        document.documentElement.style.setProperty('--accent-dark', ad);
+      })();
+    </script>
     <style>
         body {
             display: flex;
@@ -52,26 +60,28 @@ Description: Template for 2FA verification during login
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
+            color: #333;
+            background-color: #fff;
         }
         input[type="text"]:focus {
             outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+            border-color: var(--accent);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
         input[type="submit"] {
             width: 100%;
             padding: 12px;
-            background-color: #4CAF50;
+            background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
             color: white;
             border: none;
             border-radius: 4px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: opacity 0.2s;
         }
         input[type="submit"]:hover {
-            background-color: #45a049;
+            opacity: 0.9;
         }
         .error {
             background-color: #f8d7da;

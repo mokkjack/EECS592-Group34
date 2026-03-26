@@ -1,6 +1,6 @@
 <!--
 Name: signup.html
-Authors: Jack Morice, Nick Greico, Gunther Luechtefield
+Authors: Jack Morice, Nick Grieco, Gunther Luechtefield
 Description: This file contains the HTML template for the signup page of the Enclav3 application.
 It defines the structure and layout of the signup page, including a form for creating a master password.
 Inputs: Master password and password confirmation
@@ -13,6 +13,16 @@ Outputs: Rendered HTML page for signup, redirect back to login page on successfu
 <title>Create Master Password</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+<script>
+  (function() {
+    var t = localStorage.getItem('enclav3_theme') || 'dark';
+    var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
+    var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent-dark', ad);
+  })();
+</script>
 </head>
 
 <body class="align">
@@ -60,19 +70,19 @@ Outputs: Rendered HTML page for signup, redirect back to login page on successfu
 	margin: -0.5rem 0 1rem 0;
 	padding: 0.75rem 1rem;
 	border-radius: 10px;
-	border: 1px solid #242c37;
-	background: rgba(255,255,255,0.03);
+	border: 1px solid var(--border-color);
+	background: var(--bg-card-subtle, rgba(255,255,255,0.03));
 	display: flex;
 	flex-direction: column;
 	gap: 0.3rem;
 }
 .req {
 	font-size: 12px;
-	color: #7e8ba3;
+	color: var(--text-secondary);
 	transition: color 0.2s ease;
 }
 .req.met {
-	color: #8ceabb;
+	color: var(--accent);
 }
 </style>
 

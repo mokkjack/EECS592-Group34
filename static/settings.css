@@ -2,8 +2,8 @@ html, body {
   height: 100%;
   margin: 0;
   font-family: "Helvetica Neue", sans-serif;
-  background-color: #354152;
-  color: #7e8ba3;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
 }
 
 /* For the Enclav3 Settings text at the top of the page */
@@ -11,19 +11,19 @@ html, body {
   font-size: 2.4rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   text-align: center;
 }
 
-/* For the Back to Main buton in settings*/
+/* For the Back to Main button in settings*/
 .main{
   width: 100%;
   padding: 0.6rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   text-align: center;
   outline: none;
   font-size: 14px;
@@ -42,7 +42,7 @@ html, body {
 
 /* Title text above each settings section */
 .section_title {
-    color: white;
+    color: var(--text-primary);
     font-size: 1rem;
     letter-spacing: 1px;
     margin-bottom: 0.5rem;
@@ -50,15 +50,15 @@ html, body {
 
 /* Card container for each collapsible settings group */
 .settings_group {
-    border: 1px solid #242c37;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    background: rgba(255,255,255,0.04);
+    background: var(--bg-card);
     padding: 1rem;
 }
 
 /* Clickable summary/header for each collapsible settings group */
 .settings_summary {
-    color: #fff;
+    color: var(--text-primary);
     font-size: 14px;
     cursor: pointer;
     list-style: none;
@@ -67,7 +67,7 @@ html, body {
 
 /* Highlights summary text green on hover */
 .settings_summary:hover {
-    color: #8ceabb;
+    color: var(--accent);
 }
 
 /* Dropdown select for challenge question options */
@@ -75,9 +75,9 @@ html, body {
     width: 100%;
     padding: 0.6rem 1rem;
     border-radius: 999px;
-    border: 1px solid #242c37;
+    border: 1px solid var(--border-color);
     background: transparent;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 14px;
     outline: none;
     cursor: pointer;
@@ -86,7 +86,7 @@ html, body {
 
 /* Background color for dropdown options */
 .settings_select option {
-    background: #2a3344;
+    background: var(--bg-select);
 }
 
 /* Styles for text and password input fields */
@@ -95,9 +95,9 @@ input[type="password"] {
     width: 100%;
     padding: 0.6rem 1rem;
     border-radius: 999px;
-    border: 1px solid #242c37;
+    border: 1px solid var(--border-color);
     background: transparent;
-    color: #fff;
+    color: var(--text-primary);
     text-align: center;
     outline: none;
     font-size: 14px;
@@ -107,7 +107,7 @@ input[type="password"] {
 
 /* Placeholder text color for all inputs */
 input::placeholder {
-    color: #7e8ba3;
+    color: var(--text-secondary);
 }
 
 /* Green gradient submit button */
@@ -116,7 +116,7 @@ input[type="submit"] {
     padding: 0.6rem 1rem;
     border-radius: 999px;
     border: none;
-    background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+    background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
     color: white;
     font-weight: bold;
     font-size: 14px;
@@ -128,4 +128,73 @@ input[type="submit"] {
 /* Slightly fades the submit button on hover */
 input[type="submit"]:hover {
     opacity: 0.9;
+}
+
+/* Themes and Accent Customization */
+:root {
+  --bg-primary:     #354152;
+  --bg-card:        rgba(255,255,255,0.04);
+  --bg-card-subtle: rgba(255,255,255,0.03);
+  --text-primary:   #ffffff;
+  --text-secondary: #7e8ba3;
+  --border-color:   #242c37;
+  --accent:         #8ceabb;
+  --accent-dark:    #378f7b;
+  --accent-hover:   rgba(140,234,187,0.1);
+  --bg-select:      #2a3344;
+}
+
+[data-theme="light"] {
+  --bg-primary:     #eef0f4;
+  --bg-card:        rgba(0,0,0,0.04);
+  --bg-card-subtle: rgba(0,0,0,0.03);
+  --text-primary:   #1a1a2e;
+  --text-secondary: #5a6478;
+  --border-color:   #cdd2dc;
+  --accent-hover:   rgba(55,143,123,0.1);
+  --bg-select:      #e0e4ec;
+}
+
+
+/* UI customs for theme and accent selection */
+
+.theme_btn {
+  padding: 0.4rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.theme_btn:hover {
+  background: var(--accent-hover);
+}
+
+.theme_btn.active {
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border: none;
+  color: white;
+  font-weight: bold;
+}
+
+.accent_swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+}
+
+.accent_swatch:hover {
+  transform: scale(1.2);
+}
+
+.accent_swatch.active {
+  border-color: var(--text-primary);
+  transform: scale(1.15);
 }

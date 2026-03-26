@@ -55,129 +55,111 @@
             </form>
         </details>
        
-        <div class="settings-container">
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             {% for message in messages %}
-              <div class="success">{{ message }}</div>
+              <div class="settings_flash">{{ message }}</div>
             {% endfor %}
           {% endif %}
         {% endwith %}
 
-        <div class="settings-section">
-            <h2>Two-Factor Authentication (2FA)</h2>
-            <p class="section-description">
-                Two-Factor Authentication adds an extra layer of security to your account.
+        <!-- 2FA Section -->
+        <details class="settings_group">
+            <summary class="settings_summary">🔑 Two-Factor Authentication (2FA)</summary>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0.5rem 0;">
                 Tier 2 and 3 password entries can only be accessed when 2FA is enabled.
             </p>
-            
             {% if two_fa_enabled %}
-                <div class="status-enabled">
-                    <strong>Status:</strong> ✓ 2FA is enabled
-                </div>
-                <form method="POST" action="{{ url_for('disable_2fa') }}" style="margin-top: 15px;">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to disable 2FA? You will no longer be able to access Tier 2 and 3 entries.')">
-                        Disable 2FA
-                    </button>
+                <div class="settings_status settings_status_ok">✓ 2FA is enabled</div>
+                <form method="POST" action="{{ url_for('disable_2fa') }}" style="margin-top:0.75rem;">
+                    <input type="submit" value="Disable 2FA"
+                        onclick="return confirm('Disable 2FA? You will lose access to Tier 2 and 3 entries.')"
+                        style="background:linear-gradient(160deg,#ff9aa2,#c0392b);" />
                 </form>
             {% else %}
-                <div class="status-disabled">
-                    <strong>Status:</strong> 2FA is not enabled
-                </div>
-                <p style="color: #d32f2f; margin: 10px 0;">
+                <div class="settings_status settings_status_warn">2FA is not enabled</div>
+                <p style="color:#ff9aa2;font-size:13px;margin:0.5rem 0;">
                     ⚠️ Tier 2 and 3 entries are currently hidden. Set up 2FA to access them.
                 </p>
-                <form method="POST" action="{{ url_for('setup_2fa') }}" style="margin-top: 15px;">
-                    <button type="submit" class="btn btn-primary">
-                        Setup 2FA
-                    </button>
+                <form method="POST" action="{{ url_for('setup_2fa') }}" style="margin-top:0.75rem;">
+                    <input type="submit" value="Setup 2FA" />
                 </form>
             {% endif %}
-        </div>
-            <style>
-        .settings-container {
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 20px;
-        }
+        </details>
 
-        .settings-section {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 20px;
+        <!-- UI Customization Section -->
+        <details class="settings_group">
+            <summary class="settings_summary">🎨 Display Settings</summary>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0.75rem 0 0.5rem;">Theme</p>
+            <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+                <button class="theme_btn" id="btn_dark" onclick="setTheme('dark')">Dark</button>
+                <button class="theme_btn" id="btn_light" onclick="setTheme('light')">Light</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0 0 0.5rem;">Accent Color</p>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                <button class="accent_swatch" style="background:#8ceabb;" onclick="setAccent('#8ceabb','#378f7b')" title="Green"></button>
+                <button class="accent_swatch" style="background:#e03c3c;" onclick="setAccent('#e03c3c','#a01e1e')" title="Red"></button>
+                <button class="accent_swatch" style="background:#89b4fa;" onclick="setAccent('#89b4fa','#3d6fa8')" title="Blue"></button>
+                <button class="accent_swatch" style="background:#1e1e2e;border-color:#555;" onclick="setAccent('#1e1e2e','#11111b')" title="Black"></button>
+            </div>
+        </details>
+
+        <style>
+        .settings_flash {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 0.5rem;
+            font-size: 13px;
         }
-
-        .settings-section h2 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
+        .settings_status {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 0.5rem;
         }
-
-        .section-description {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 0 0 15px 0;
+        .settings_status_ok {
+            background: rgba(140,234,187,0.12);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
         }
-
-        .status-enabled {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 4px solid #28a745;
+        .settings_status_warn {
+            background: rgba(255,154,162,0.12);
+            color: #ff9aa2;
+            border-left: 3px solid #ff9aa2;
         }
-
-        .status-disabled {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 4px solid #f5c6cb;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #45a049;
-        }
-
-        .btn-danger {
-            background-color: #d32f2f;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #b71c1c;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-        }
-    </style>
+        </style>
     </div>
-    </div>
+
+    <script>
+    function setTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('enclav3_theme', t);
+        document.getElementById('btn_dark').classList.toggle('active', t === 'dark');
+        document.getElementById('btn_light').classList.toggle('active', t === 'light');
+    }
+    function setAccent(color, dark) {
+        document.documentElement.style.setProperty('--accent', color);
+        document.documentElement.style.setProperty('--accent-dark', dark);
+        localStorage.setItem('enclav3_accent', color);
+        localStorage.setItem('enclav3_accent_dark', dark);
+        document.querySelectorAll('.accent_swatch').forEach(function(s) {
+            s.classList.remove('active');
+            if (s.style.background === color) s.classList.add('active');
+        });
+    }
+    // apply saved theme/accent on page load
+    (function() {
+        var t = localStorage.getItem('enclav3_theme') || 'dark';
+        var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
+        var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+        setTheme(t);
+        setAccent(a, ad);
+    })();
+    </script>
     <a href="/main" class="main">Back to Account</a>
     </body>
 </html>

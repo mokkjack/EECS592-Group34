@@ -8,8 +8,8 @@ html, body {
   height: 100%;
   margin: 0;
   font-family: "Helvetica Neue", sans-serif;
-  background-color: #354152;
-  color: #7e8ba3;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
 }
 
 /* Layout Format */
@@ -34,7 +34,7 @@ html, body {
   text-align: center;
   padding: 4rem 2rem;
   box-shadow: 0 0 250px #000;
-  background: rgba(255,255,255,0.04);
+  background: var(--bg-card);
   border-radius: 12px;
   min-height: 1000px;
 }
@@ -45,13 +45,13 @@ html, body {
   font-size: 2.4rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
   font-size: 0.9rem;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   margin-bottom: 0rem;
 }
 
@@ -59,11 +59,11 @@ html, body {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
-.form_layout { 
+.form_layout {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -72,31 +72,31 @@ html, body {
 }
 
 #toggleAllTiers {
-  padding: 0.25rem 0.7rem;      
-  border-radius: 999px;            
-  border: 1px solid #242c37;     
-  background: transparent;        
-  color: #8ceabb;                 
-  font-size: 12px;                
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;            
+  display: flex;
   justify-content: center;
   outline: none;
   margin-bottom: 10px;
 }
 
 #toggleAllTiers:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 #toggleAllTiers:active {
-  background: rgba(140,234,187,0.2);
+  background: var(--accent-active);
 }
 
 #toggleAllTiers.active {
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   border: none;
   color: white;
 }
@@ -112,20 +112,20 @@ html, body {
   padding: 0.8rem 1.2rem;
   margin-bottom: 1.9rem;
   border-radius: 12px;
-  border: 1px solid #242c37;
-  background: rgba(255,255,255,0.03);
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card-subtle);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
 }
 
 .radio_option label:hover {
-  background: rgba(255,255,255,0.08);
+  background: var(--bg-card-mid);
 }
 
 .radio_option input[type="radio"]:checked + label {
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   border: none;
   color: white;
   font-weight: bold;
@@ -133,9 +133,9 @@ html, body {
 
 /* radio row css for sorting options */
 .radio_row {
-  display: inline-flex;      
-  gap: 1rem;         
-  flex-wrap: wrap;     
+  display: inline-flex;
+  gap: 1rem;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
 }
@@ -149,20 +149,20 @@ html, body {
   align-items: center;
   padding: 0.6rem 1.0rem;
   border-radius: 12px;
-  border: 1px solid #242c37;
-  background: rgba(255,255,255,0.03);
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card-subtle);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
 }
 
 .radio_row label:hover {
-  background: rgba(255,255,255,0.08);
+  background: var(--bg-card-mid);
 }
 
 .radio_row input[type="radio"]:checked + label {
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   border: none;
   color: white;
   font-weight: bold;
@@ -175,9 +175,9 @@ html, body {
   width: 100%;
   padding: 0.6rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   text-align: center;
   outline: none;
   font-size: 14px;
@@ -200,8 +200,8 @@ html, body {
 }
 
 .password_card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid #242c37;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
   text-align: left;
@@ -209,7 +209,7 @@ html, body {
 }
 
 .password_card:hover {
-  background: rgba(255,255,255,0.06);
+  background: var(--bg-card-hover);
   transform: translateY(-3px);
 }
 
@@ -233,9 +233,9 @@ html, body {
 .delete_button {
   padding: 0.35rem 0.55rem;
   border-radius: 10px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #ff9aa2;
+  color: var(--delete-color);
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
@@ -248,18 +248,18 @@ html, body {
 
 .card_header h3 {
   margin: 0;
-  color: #8ceabb;
+  color: var(--accent);
 }
 
 .card_date {
   font-size: 12px;
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 
 .card_body p {
   margin: 0.4rem 0;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .toggle_password {
@@ -268,16 +268,16 @@ html, body {
   min-width: 4rem;
   text-align: center;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #8ceabb;
+  color: var(--accent);
   cursor: pointer;
   font-size: 12px;
   transition: all 0.2s ease;
 }
 
 .toggle_password:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 
@@ -291,22 +291,22 @@ input {
   width: 100%;
   padding: 0.6rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   text-align: center;
   outline: none;
   font-size: 14px;
 }
 
 input::placeholder {
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 
 /* Green unlock button*/
 
 input[type="submit"] {
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -316,6 +316,7 @@ input[type="submit"] {
 input[type="submit"]:hover {
   opacity: 0.9;
 }
+
 /* Copy Button */
 .copy_button {
   margin-left: 0.6rem;
@@ -323,15 +324,15 @@ input[type="submit"]:hover {
   min-width: 4rem;
   text-align: center;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #8ceabb;
+  color: var(--accent);
   cursor: pointer;
   font-size: 12px;
 }
 
 .copy_button:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 /* Layout for username/password rows with Copy Button */
@@ -354,32 +355,32 @@ p {
 
 .tier_summary {
     display: flex;
-    justify-content: space-between; 
+    justify-content: space-between;
     align-items: center;
-    padding: 0.25rem 0.7rem;      
-    border-radius: 999px;           
-    border: 1px solid #242c37;
-    background: transparent;        
-    color: #8ceabb;
-    font-size: 12px;                
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--accent);
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     width: fit-content;
-    margin-bottom: 10px;        
+    margin-bottom: 10px;
 }
 
 .tier_summary:hover {
-    background: rgba(140,234,187,0.1);
+    background: var(--accent-hover);
 }
 
 .tier_summary:active {
-    background: rgba(140,234,187,0.2);
+    background: var(--accent-active);
 }
 
 .tier_count {
     font-size: 12px;
-    color: #fff; 
+    color: var(--text-primary);
     margin-left: 0.5rem;
 }
 
@@ -401,16 +402,16 @@ p {
   min-width: 4rem;
   text-align: center;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #8ceabb;
+  color: var(--accent);
   cursor: pointer;
   font-size: 12px;
   transition: all 0.2s ease;
 }
 
 .edit_button:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 /* Edit Model Overlay */
@@ -425,8 +426,8 @@ p {
 }
 /* Edit Model Content */
 .edit_model {
-  background: #1a2130;
-  border: 1px solid #242c37;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2rem 2rem 1.5rem;
   width: 380px;
@@ -437,7 +438,7 @@ p {
 
 .edit_model_title {
   font-size: 16px;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -447,9 +448,9 @@ p {
   width: 100%;
   padding: 0.85rem 1.25rem;
   border-radius: 999px;
-  border: 1px solid #2e3a4a;
-  background: #131b27;
-  color: #fff;
+  border: 1px solid var(--border-light);
+  background: var(--bg-input);
+  color: var(--text-primary);
   text-align: center;
   font-size: 15px;
   box-sizing: border-box;
@@ -457,7 +458,7 @@ p {
 /* Placeholder color for inputs inside the edit model */
 .edit_model input[type="text"]::placeholder,
 .edit_model input[type="password"]::placeholder {
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 /* Submit Button inside Edit Model */
 .edit_model input[type="submit"] {
@@ -465,7 +466,7 @@ p {
   padding: 0.85rem;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: #fff;
   font-weight: bold;
   font-size: 15px;
@@ -482,7 +483,7 @@ p {
 }
 /* Label for each tier option */
 .edit_tier_label {
-  color: #8ceabb;
+  color: var(--accent);
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -494,16 +495,16 @@ p {
 .edit_tier_label input[type="radio"] {
   width: auto;
   padding: 0;
-  accent-color: #8ceabb;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 /* Cancel Button */
 .edit_cancel_button {
   padding: 0.55rem 1.8rem;
   border-radius: 999px;
-  border: 1px solid #2e3a4a;
+  border: 1px solid var(--border-light);
   background: transparent;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 14px;
   align-self: center;
@@ -512,8 +513,9 @@ p {
 }
 
 .edit_cancel_button:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--bg-card-subtle);
 }
+
 /* ============================================================
    Vault
    ============================================================ */
@@ -556,16 +558,16 @@ p {
 .vault_lock_msg {
   font-size: 13px;
   font-weight: 600;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   text-align: center;
 }
 
 /* Vault panel */
 .vault_section {
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
-  background: rgba(255,255,255,0.04);
+  background: var(--bg-card);
 }
 
 .vault_header {
@@ -579,22 +581,22 @@ p {
 .vault_title {
   font-weight: 700;
   font-size: 15px;
-  color: #8ceabb;
+  color: var(--accent);
   letter-spacing: 1px;
 }
 
 .vault_subtitle {
   font-size: 12px;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   flex: 1;
 }
 
 .vault_upload_toggle {
   padding: 0.25rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #8ceabb;
+  color: var(--accent);
   font-size: 12px;
   font-weight: bold;
   cursor: pointer;
@@ -602,13 +604,13 @@ p {
 }
 
 .vault_upload_toggle:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 /* Upload form */
 .vault_upload_form {
-  background: rgba(255,255,255,0.03);
-  border: 1px dashed #2e3a4a;
+  background: var(--bg-card-subtle);
+  border: 1px dashed var(--border-light);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -625,9 +627,9 @@ p {
 .vault_file_label {
   padding: 0.4rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 13px;
   white-space: nowrap;
@@ -635,7 +637,7 @@ p {
 }
 
 .vault_file_label:hover {
-  background: rgba(255,255,255,0.06);
+  background: var(--bg-card-hover);
 }
 
 input[type="file"] {
@@ -644,29 +646,29 @@ input[type="file"] {
 
 .vault_file_chosen {
   font-size: 12px;
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 
 .vault_notes_input {
   flex: 1;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
 }
 
 .vault_notes_input::placeholder {
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 
 .vault_submit {
   padding: 0.4rem 1.2rem;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: #fff;
   font-size: 13px;
   font-weight: bold;
@@ -681,16 +683,16 @@ input[type="file"] {
 .vault_cancel {
   padding: 0.4rem 1rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .vault_cancel:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--bg-card-subtle);
 }
 
 /* File list */
@@ -704,15 +706,15 @@ input[type="file"] {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid #242c37;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 0.85rem 1rem;
   transition: all 0.2s ease;
 }
 
 .vault_file_card:hover {
-  background: rgba(255,255,255,0.07);
+  background: var(--bg-card-hover);
   transform: translateY(-2px);
 }
 
@@ -732,7 +734,7 @@ input[type="file"] {
 .vault_file_name {
   font-weight: 600;
   font-size: 13px;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -740,12 +742,12 @@ input[type="file"] {
 
 .vault_file_notes {
   font-size: 12px;
-  color: #7e8ba3;
+  color: var(--text-secondary);
 }
 
 .vault_file_date {
   font-size: 11px;
-  color: #4e5d6e;
+  color: var(--text-muted);
 }
 
 .vault_file_actions {
@@ -758,9 +760,9 @@ input[type="file"] {
 .vault_download_btn {
   padding: 0.25rem 0.8rem;
   border-radius: 999px;
-  border: 1px solid #242c37;
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #8ceabb;
+  color: var(--accent);
   font-size: 12px;
   font-weight: bold;
   text-decoration: none;
@@ -769,11 +771,11 @@ input[type="file"] {
 }
 
 .vault_download_btn:hover {
-  background: rgba(140,234,187,0.1);
+  background: var(--accent-hover);
 }
 
 .vault_empty {
-  color: #4e5d6e;
+  color: var(--text-muted);
   font-size: 13px;
   margin: 4px 0 0 0;
 }
@@ -786,6 +788,44 @@ input[type="file"] {
 
 .tier_lock_hint {
   font-size: 11px;
-  color: #7e8ba3;
+  color: var(--text-secondary);
   margin-left: 4px;
+}
+
+/* Themes and Accent Customization */
+:root {
+  --bg-primary:     #354152;
+  --bg-card:        rgba(255,255,255,0.04);
+  --bg-card-hover:  rgba(255,255,255,0.06);
+  --bg-card-mid:    rgba(255,255,255,0.08);
+  --bg-card-subtle: rgba(255,255,255,0.03);
+  --bg-modal:       #1a2130;
+  --bg-input:       #131b27;
+  --text-primary:   #ffffff;
+  --text-secondary: #7e8ba3;
+  --text-muted:     #4e5d6e;
+  --border-color:   #242c37;
+  --border-light:   #2e3a4a;
+  --accent:         #8ceabb;
+  --accent-dark:    #378f7b;
+  --accent-hover:   rgba(140,234,187,0.1);
+  --accent-active:  rgba(140,234,187,0.2);
+  --delete-color:   #ff9aa2;
+}
+
+[data-theme="light"] {
+  --bg-primary:     #eef0f4;
+  --bg-card:        rgba(0,0,0,0.04);
+  --bg-card-hover:  rgba(0,0,0,0.07);
+  --bg-card-mid:    rgba(0,0,0,0.08);
+  --bg-card-subtle: rgba(0,0,0,0.03);
+  --bg-modal:       #ffffff;
+  --bg-input:       #f0f2f5;
+  --text-primary:   #1a1a2e;
+  --text-secondary: #5a6478;
+  --text-muted:     #8a9ab0;
+  --border-color:   #cdd2dc;
+  --border-light:   #c0c8d5;
+  --accent-hover:   rgba(55,143,123,0.1);
+  --accent-active:  rgba(55,143,123,0.2);
 }

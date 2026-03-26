@@ -8,6 +8,16 @@ Inputs: Password entries retrieved from the database, flash messages for user fe
 Outputs: Rendered HTML page displaying password entries and a form for adding new entries
 -->
 <!DOCTYPE html>
+<script>
+  (function() {
+    var t = localStorage.getItem('enclav3_theme') || 'dark';
+    var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
+    var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent-dark', ad);
+  })();
+</script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
