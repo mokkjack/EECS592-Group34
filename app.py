@@ -7,13 +7,13 @@ Inputs: User interactions with the web interface (login, signup, add entry, logo
 Outputs: Rendered HTML pages for login, signup, and main page with password entries; flash messages for errors and confirmations
 Resources: ChatGPT was used in the pywebview integration.
 '''
+import os
 import threading
 import time
 
 import webview
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.serving import make_server
-from io import BytesIO
 import mimetypes
 
 import backend
@@ -255,6 +255,34 @@ def logout(): #Logout handler
     session.pop("master_password", None)
     return redirect(url_for("login"))
 
+@app.route("/delete-account", methods=["POST"])
+def delete_account():
+    """Permanently delete the database and log the user out."""
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    session.clear()
+    import gc, sqlite3 as _sqlite3
+    # Force garbage collection to close any lingering connection objects
+    gc.collect()
+    try:
+        if os.path.exists(DB_PATH):
+            # Checkpoint WAL so no sidecar holds data, then close cleanly
+            try:
+                _conn = _sqlite3.connect(DB_PATH)
+                _conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                _conn.close()
+            except Exception:
+                pass
+            os.remove(DB_PATH)
+            # Remove WAL / SHM sidecar files if present
+            for _suffix in ("-wal", "-shm"):
+                _sidecar = DB_PATH + _suffix
+                if os.path.exists(_sidecar):
+                    os.remove(_sidecar)
+    except OSError:
+        pass
+    return redirect(url_for("login"))
+
 @app.route("/verify-2fa", methods=["GET", "POST"])
 def verify_2fa():
     """Verify 2FA token during login"""
@@ -396,7 +424,7 @@ def vault_upload():
 
 @app.route("/vault/download/<int:file_id>")
 def vault_download(file_id: int):
-    """Decrypt and stream a vault file back to the user."""
+    """Decrypt and save a vault file to the user's Downloads folder."""
     master_password = session.get("master_password")
     if not master_password:
         return redirect(url_for("login"))
@@ -410,12 +438,24 @@ def vault_download(file_id: int):
         flash(str(exc))
         return redirect(url_for("main"))
 
-    return send_file(
-        BytesIO(vault_file["file_bytes"]),
-        mimetype=vault_file["mime_type"],
-        as_attachment=True,
-        download_name=vault_file["filename"],
-    )
+    # Save directly to the user's Downloads folder (works reliably in pywebview)
+    downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+    os.makedirs(downloads_dir, exist_ok=True)
+
+    # Avoid overwriting existing files by appending a counter if needed
+    filename = vault_file["filename"]
+    dest = os.path.join(downloads_dir, filename)
+    base, ext = os.path.splitext(filename)
+    counter = 1
+    while os.path.exists(dest):
+        dest = os.path.join(downloads_dir, f"{base} ({counter}){ext}")
+        counter += 1
+
+    with open(dest, "wb") as f:
+        f.write(vault_file["file_bytes"])
+
+    flash(f"'{os.path.basename(dest)}' saved to Downloads folder.")
+    return redirect(url_for("main"))
 
 
 @app.route("/vault/delete/<int:file_id>", methods=["POST"])
