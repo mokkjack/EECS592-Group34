@@ -10,6 +10,8 @@ Resources: ChatGPT was used in the pywebview integration.
 import os
 import threading
 import time
+import io
+import csv
 
 import webview
 from flask import Flask, render_template, request, redirect, url_for, session, flash
@@ -475,6 +477,68 @@ def vault_delete(file_id: int):
         flash(str(exc))
 
     return redirect(url_for("main") + "#tier3")
+
+
+@app.route("/import-passwords", methods=["POST"])
+def import_passwords():
+    """Import passwords from CSV file with headers name,url,username,password,note."""
+    master_password = session.get("master_password")
+    if not master_password:
+        return redirect(url_for("login"))
+
+    file = request.files.get("password_file")
+    if not file or file.filename == "":
+        flash("No file selected for import.")
+        return redirect(url_for("settings"))
+
+    if not file.filename.lower().endswith(".csv"):
+        flash("Please upload a CSV file.")
+        return redirect(url_for("settings"))
+
+    try:
+        text = file.stream.read().decode("utf-8-sig")
+    except Exception as exc:
+        flash(f"Could not read uploaded file: {exc}")
+        return redirect(url_for("settings"))
+
+    reader = csv.DictReader(io.StringIO(text))
+    expected_h = {"name", "url", "username", "password", "note"}
+    headers = {h.strip().lower() for h in reader.fieldnames or []}
+
+    if not expected_h.issubset(headers):
+        missing = sorted(expected_h - headers)
+        flash(f"CSV missing required headers: {', '.join(missing)}")
+        return redirect(url_for("settings"))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    for row in reader:
+        site = (row.get("name") or "").strip() or (row.get("url") or "").strip()
+        url = (row.get("url") or "").strip()
+        username = (row.get("username") or "").strip()
+        password = (row.get("password") or "").strip()
+        notes = (row.get("note") or "").strip() or None
+
+        if not site or not username or not password:
+            skipped += 1
+            continue
+
+        if not site and url:
+            site = url
+
+        try:
+            backend.add_entry(DB_PATH, Entry(site=site, username=username, password=password, notes=notes), master_password)
+            imported += 1
+        except Exception as exc:
+            skipped += 1
+            errors.append(str(exc))
+
+    msg = f"Import complete: {imported} entries added, {skipped} skipped."
+    if errors:
+        msg += f" Errors: {len(errors)} (first: {errors[0]})"
+    flash(msg)
+    return redirect(url_for("settings"))
 
 
 def _run_flask_server() -> None: #Create a function to run the Flask server

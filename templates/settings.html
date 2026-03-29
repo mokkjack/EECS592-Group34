@@ -104,6 +104,23 @@
             </div>
         </details>
 
+        <!-- Import Passwords Section -->
+        <details class="settings_group">
+            <summary class="settings_summary">⬆️ Import Passwords</summary>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0.5rem 0;">
+                Import passwords from a file or another password manager. CSV only, header: name,url,username,password,note
+            </p>
+            <form method="POST" action="/import-passwords" enctype="multipart/form-data">
+                <div class="form__field">
+                    <input type="file" name="password_file" accept=".csv" required />
+                </div>
+                <div class="form__field">
+                    <input type="submit" value="Import Passwords"
+                           style="background:linear-gradient(160deg,#8ceabb,#378f7b);margin-top:0.25rem;" />
+                </div>
+            </form>
+        </details>
+
         <!-- Delete Account Section -->
         <details class="settings_group">
             <summary class="settings_summary">🗑️ Delete Account</summary>
