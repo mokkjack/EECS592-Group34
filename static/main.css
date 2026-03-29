@@ -10,6 +10,8 @@ html, body {
   font-family: "Helvetica Neue", sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-secondary);
+  min-width: 900px;
+  min-height: 600px;
 }
 
 /* Layout Format */
@@ -32,8 +34,8 @@ html, body {
 /* Login box */
 .register {
   text-align: center;
-  padding: 4rem 2rem;
-  box-shadow: 0 0 250px #000;
+  padding: 2rem 0.5rem;
+  box-shadow: 0 0 125px #000;
   background: var(--bg-card);
   border-radius: 12px;
   min-height: 1000px;
@@ -138,6 +140,7 @@ html, body {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  margin-bottom: 1rem;
 }
 .radio_row input[type="radio"] {
   display: none;
@@ -522,9 +525,16 @@ p {
 
 /* Wrapper — positioning context for the lock overlay */
 .vault_wrapper {
-  position: relative;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   margin: 20px 0;
   border-radius: 16px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  z-index: 1000;
 }
 
 /* Greyed-out content when locked */
@@ -566,7 +576,7 @@ p {
 .vault_section {
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 3rem;
   background: var(--bg-card);
 }
 
@@ -790,6 +800,20 @@ input[type="file"] {
   font-size: 11px;
   color: var(--text-secondary);
   margin-left: 4px;
+}
+
+.layout {
+    display: flex;
+    gap: 20px;
+}
+
+.left_panel {
+    width: 40%;
+}
+
+.right_panel {
+  position: relative;
+  width: 60%;
 }
 
 /* Themes and Accent Customization */

@@ -24,416 +24,426 @@ Outputs: Rendered HTML page displaying password entries and a form for adding ne
 
 <body>
     <div class="grid">
-        <div class="register">
-            <div class="brand">Enclav3</div>
-            <div class="subtitle">Your passwords</div>
+        <div class="layout">
+            <div class="left_panel">
+                <div class="register">
+                    <div class="brand">Enclav3</div>
 
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                {% for message in messages %}
-                  <div class="success">{{ message }}</div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-            {% if tier1_entries or tier2_entries or tier3_entries %} <!-- only show tiers if there are entries -->
-            <div class="subtitle">Sort By:</div>
-            <form method="GET" action="{{ url_for('main') }}">
-    
-
-                <div class="radio_row">
-                    <input type="radio" id="alphabetical" name="sort" value="alpha"
-                        {{ 'checked' if sort == 'alpha' else '' }}
-                        onchange="this.form.submit()">
-                        <label for = "alphabetical">A - Z</label>
-                </div>
-
-                <div class="radio_row">
-                    <input type="radio" id="newest" name="sort" value="newest"
-                        {{ 'checked' if sort == 'newest' else '' }}
-                        onchange="this.form.submit()">
-                        <label for = "newest">Newest First</label>
-                </div>
-
-                <div class="radio_row">
-                    <input type="radio" id="oldest" name="sort" value="oldest"
-                        {{ 'checked' if sort == 'oldest' else '' }}
-                        onchange="this.form.submit()">
-                        <label for = "oldest">Oldest First</label> 
-                </div>
-            </form>
-            
-            <div class="button">
-                <button type="button" id="toggleAllTiers">Show All</button>
-            </div>
-
-            <div class="tier_groups">
-
-                <!-- TIER 1 -->
-                <details class="tier_group" id="tier1">
-                    <summary class="tier_summary">
-                        <span>Tier 1</span>
-                        <span class="tier_count">({{ tier1_entries|length }})</span>
-                    </summary>
-
-                    <div class="password_cards"> 
-                        {% for entry in tier1_entries %}
-                        <div class="password_card">
-
-                            <div class="card_header">
-                                <h3>{{ entry.site }}</h3>
-
-                                <div class="card_actions"> <!-- displays the date the entry was created and a delete button -->
-                                    <span class="card_date">{{ entry.created_at }}</span>
-
-                                    <form class="delete_form" 
-                                        method="POST"
-                                        action="{{ url_for('delete_entry', entry_id=entry.id) }}">
-                                        <button type="submit"
-                                                class="delete_button"
-                                                title="Delete"
-                                                onclick="return confirm('Delete this entry?')">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <div class="card_body">
-
-                                <p class="field_row"> <!-- displays the username with a copy button -->
-                                    <strong>Username:</strong>
-                                    <span class="field_value">{{ entry.username }}</span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.username }}">
-                                        Copy
-                                    </button>
-                                    <button type="button"
-                                            class="edit_button"
-                                            data-id="{{ entry.id }}"
-                                            data-site="{{ entry.site }}"
-                                            data-username="{{ entry.username }}"
-                                            data-password="{{ entry.password }}"
-                                            data-notes="{{ entry.notes }}"
-                                            data-tier="low">
-                                        Edit
-                                    </button>
-                                </p>
-
-                                <p class="field_row"> <!-- displays the password with a button to show and hide and a copy button -->
-                                    <strong>Password:</strong>
-                                    <span class="password_text">••••••••</span>
-                                    <span class="real_password" style="display:none;">
-                                        {{ entry.password }}
-                                    </span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.password }}">
-                                        Copy
-                                    </button>
-                                    <button type="button" class="toggle_password">Show</button>
-                                </p>
-
-                                {% if entry.notes %}
-                                <p>
-                                    <strong>Notes:</strong> {{ entry.notes }}
-                                </p>
-                                {% endif %}
-
-                            </div>
-                        </div>
-
-                        {% else %}
-                        <p class="empty_tier">No Tier 1 passwords yet.</p>
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="success">{{ message }}</div>
                         {% endfor %}
-                    </div>
-
-                </details>
-
-                <!-- TIER 2 -->
-                <details class="tier_group" id="tier2">
-                    <summary class="tier_summary">
-                        <span>Tier 2</span>
-                        <span class="tier_count">({{ tier2_entries|length }})</span>
-                    </summary>
-
-                    <div class="password_cards">
-                        {% for entry in tier2_entries %}
-                        <div class="password_card">
-
-                            <div class="card_header">
-                                <h3>{{ entry.site }}</h3>
-
-                                <div class="card_actions">
-                                    <span class="card_date">{{ entry.created_at }}</span>
-
-                                    <form class="delete_form"
-                                        method="POST"
-                                        action="{{ url_for('delete_entry', entry_id=entry.id) }}">
-                                        <button type="submit"
-                                                class="delete_button"
-                                                title="Delete"
-                                                onclick="return confirm('Delete this entry?')">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <div class="card_body">
-
-                                <p class="field_row">
-                                    <strong>Username:</strong>
-                                    <span class="field_value">{{ entry.username }}</span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.username }}">
-                                        Copy
-                                    </button>
-                                    <button type="button"
-                                            class="edit_button"
-                                            data-id="{{ entry.id }}"
-                                            data-site="{{ entry.site }}"
-                                            data-username="{{ entry.username }}"
-                                            data-password="{{ entry.password }}"
-                                            data-notes="{{ entry.notes }}"
-                                            data-tier="medium">
-                                        Edit
-                                    </button>
-                                </p>
-
-                                <p class="field_row">
-                                    <strong>Password:</strong>
-                                    <span class="password_text">••••••••</span>
-                                    <span class="real_password" style="display:none;">
-                                        {{ entry.password }}
-                                    </span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.password }}">
-                                        Copy
-                                    </button>
-                                    <button type="button" class="toggle_password">Show</button>
-                                </p>
-
-                                {% if entry.notes %}
-                                <p>
-                                    <strong>Notes:</strong> {{ entry.notes }}
-                                </p>
-                                {% endif %}
-
-                            </div>
-                        </div>
-
-                        {% else %}
-                        <p class="empty_tier">No Tier 2 passwords yet.</p>
-                        {% endfor %}
-                    </div>
-                </details>
-
-                <!-- TIER 3 -->
-                <details class="tier_group" id="tier3">
-                    <summary class="tier_summary">
-                        <span>Tier 3</span>
-                        <span class="tier_count">({{ tier3_entries|length }})</span>
-                    </summary>
-
-                    <div class="password_cards">
-                        {% for entry in tier3_entries %}
-                        <div class="password_card">
-
-                            <div class="card_header">
-                                <h3>{{ entry.site }}</h3>
-
-                                <div class="card_actions">
-                                    <span class="card_date">{{ entry.created_at }}</span>
-
-                                    <form class="delete_form"
-                                        method="POST"
-                                        action="{{ url_for('delete_entry', entry_id=entry.id) }}">
-                                        <button type="submit"
-                                                class="delete_button"
-                                                title="Delete"
-                                                onclick="return confirm('Delete this entry?')">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <div class="card_body">
-                                <p class="field_row">
-                                    <strong>Username:</strong>
-                                    <span class="field_value">{{ entry.username }}</span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.username }}">
-                                        Copy
-                                    </button>
-                                    <button type="button"
-                                            class="edit_button"
-                                            data-id="{{ entry.id }}"
-                                            data-site="{{ entry.site }}"
-                                            data-username="{{ entry.username }}"
-                                            data-password="{{ entry.password }}"
-                                            data-notes="{{ entry.notes }}"
-                                            data-tier="high">
-                                        Edit
-                                    </button>
-                                </p>
-
-                                <p class="field_row">
-                                    <strong>Password:</strong>
-                                    <span class="password_text">••••••••</span>
-                                    <span class="real_password" style="display:none;">
-                                        {{ entry.password }}
-                                    </span>
-                                    <button type="button"
-                                            class="copy_button"
-                                            data-copy="{{ entry.password }}">
-                                        Copy
-                                    </button>
-                                    <button type="button" class="toggle_password">Show</button>
-                                </p>
-
-                                {% if entry.notes %}
-                                <p><strong>Notes:</strong> {{ entry.notes }}</p>
-                                {% endif %}
-                            </div>
-
-                        </div>
-                        {% else %}
-                        <p class="empty_tier">No Tier 3 passwords yet.</p>
-                        {% endfor %}
-                    </div>
-
-                </details>
-
-            </div> <!-- end tier_groups -->
-            
-            {% else %}
-            <div class="subtitle">No passwords yet. Add your first one below.</div>
-            {% endif %}
-
-            <!-- ===== VAULT — always visible, unlocks when Tier 1 is selected ===== -->
-            <div class="vault_wrapper" id="vaultWrapper">
-                <!-- lock overlay — sits on top when locked -->
-                <div class="vault_lock_overlay" id="vaultLockOverlay">
-                    <span class="vault_lock_icon">🔒</span>
-                    <span class="vault_lock_msg">Select Tier 3 to access the Vault</span>
-                </div>
-
-                <div class="vault_section">
-                    <div class="vault_header">
-                        <span class="vault_title">🗄️ Vault</span>
-                        <span class="vault_subtitle">Files encrypted with Tier&nbsp;3 key</span>
-                        <button type="button" class="vault_upload_toggle" id="vaultUploadToggle">+ Add File</button>
-                    </div>
-
-                    <!-- Upload form (hidden by default) -->
-                    <div class="vault_upload_form" id="vaultUploadForm" style="display:none;">
-                        <form method="POST" action="{{ url_for('vault_upload') }}" enctype="multipart/form-data">
-                            <div class="vault_form_row">
-                                <label class="vault_file_label" for="vault_file_input">Choose file</label>
-                                <input type="file" id="vault_file_input" name="vault_file" required
-                                       onchange="document.getElementById('vault_file_name').textContent = this.files[0]?.name || 'No file chosen'">
-                                <span class="vault_file_chosen" id="vault_file_name">No file chosen</span>
-                            </div>
-                            <div class="vault_form_row">
-                                <input type="text" name="vault_notes" placeholder="Notes (optional)" class="vault_notes_input" />
-                            </div>
-                            <div class="vault_form_row">
-                                <input type="submit" value="Encrypt &amp; Upload" class="vault_submit" />
-                                <button type="button" class="vault_cancel" id="vaultUploadCancel">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- File list -->
-                    {% if vault_files %}
-                    <div class="vault_file_list">
-                        {% for vf in vault_files %}
-                        <div class="vault_file_card">
-                            <span class="vault_file_icon">{{ vf.filename | vault_icon }}</span>
-                            <div class="vault_file_info">
-                                <span class="vault_file_name">{{ vf.filename }}</span>
-                                {% if vf.notes %}
-                                <span class="vault_file_notes">{{ vf.notes }}</span>
-                                {% endif %}
-                                <span class="vault_file_date">{{ vf.created_at }}</span>
-                            </div>
-                            <div class="vault_file_actions">
-                                <a href="{{ url_for('vault_download', file_id=vf.id) }}"
-                                   class="vault_download_btn">⬇️ Download</a>
-                                <form method="POST" action="{{ url_for('vault_delete', file_id=vf.id) }}"
-                                      style="display:inline;">
-                                    <button type="submit" class="delete_button" title="Delete"
-                                            onclick="return confirm('Permanently delete this vault file?')">🗑️</button>
-                                </form>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="vault_empty">No files in vault yet.</p>
                     {% endif %}
-                </div>
-            </div>
-            <!-- ===== END VAULT ===== -->
-
-            <form class="form" method="POST" action="/add-entry">
+                    <form class="form" method="POST" action="/add-entry">
+                                
+                    <div class="form_layout">
+                        <!-- left side of box -->
+                        <div class="form_left">
+                            <div class="title">Add a Password</div>
+                            <div class="form__field" >
+                                <input type="text" name="site" autocomplete="off" autocapitalize="on" placeholder="Site" required />
+                            </div>
+                            <div class="form__field" >
+                                <input type="text" name="username" autocomplete="off" placeholder="Username" required />
+                            </div>
+                            <div class="form__field" >
+                                <input type="password" name="password" autocomplete="off" placeholder="Password" required />
+                            </div>
                             
-                <div class="form_layout">
-                    <!-- left side of box -->
-                    <div class="form_left">
-                        <div class="title">Add a Password</div>
-                        <div class="form__field" >
-                            <input type="text" name="site" autocomplete="off" autocapitalize="on" placeholder="Site" required />
+                            <div class="form__field" >
+                                <input type="text" name="notes" autocomplete="off" placeholder="Notes (optional)" />
+                            </div>
                         </div>
-                        <div class="form__field" >
-                            <input type="text" name="username" autocomplete="off" placeholder="Username" required />
+
+                        <!-- right side of box -->
+                        <div class="form_right"> 
+                            <div class="title">Password Tier</div>
+
+                            <div class="radio_option">
+                                <input type="radio" id="tier_low" name="option" value="low" checked> 
+                                <label for ="tier_low">Tier 1</label>
+                            </div>
+                            <div class="radio_option">
+                                <input type="radio" id="tier_medium" name="option" value="medium"
+                                    {{ 'disabled' if not two_fa_enabled else '' }}>
+                                <label for="tier_medium" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
+                                    Tier 2 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
+                                </label>
+                            </div>
+                            <div class="radio_option">
+                                <input type="radio" id="tier_high" name="option" value="high"
+                                    {{ 'disabled' if not two_fa_enabled else '' }}>
+                                <label for="tier_high" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
+                                    Tier 3 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
+                                </label>
+                            </div>
+                        </div>      
+                    </div>
+                    <div class="form__field">
+                        <input type="submit" value="Add Password" />
+                    </div>
+                </form>
+                    {% endwith %}
+
+                    {% if tier1_entries or tier2_entries or tier3_entries %} <!-- only show tiers if there are entries -->
+                    
+                    </form>
+                    
+
+                    <a href="/logout" class="logout">Logout</a>
+                    <a href="/settings" class="settings">Settings</a>
+                </div>
+                
+            </div>
+            <div class="right_panel">
+                <div class="title">Your Passwords</div>
+                <div class="button">
+                    <button type="button" id="toggleAllTiers">Show All</button>
+                </div>
+                <div class="subtitle">Sort By:</div>
+                    <form method="GET" action="{{ url_for('main') }}">
+            
+
+                        <div class="radio_row">
+                            <input type="radio" id="alphabetical" name="sort" value="alpha"
+                                {{ 'checked' if sort == 'alpha' else '' }}
+                                onchange="this.form.submit()">
+                                <label for = "alphabetical">A - Z</label>
                         </div>
-                        <div class="form__field" >
-                            <input type="password" name="password" autocomplete="off" placeholder="Password" required />
+
+                        <div class="radio_row">
+                            <input type="radio" id="newest" name="sort" value="newest"
+                                {{ 'checked' if sort == 'newest' else '' }}
+                                onchange="this.form.submit()">
+                                <label for = "newest">Newest First</label>
                         </div>
-                        
-                        <div class="form__field" >
-                            <input type="text" name="notes" autocomplete="off" placeholder="Notes (optional)" />
+
+                        <div class="radio_row">
+                            <input type="radio" id="oldest" name="sort" value="oldest"
+                                {{ 'checked' if sort == 'oldest' else '' }}
+                                onchange="this.form.submit()">
+                                <label for = "oldest">Oldest First</label> 
                         </div>
+                <div class="tier_groups">
+
+                    <!-- TIER 1 -->
+                    <details class="tier_group" id="tier1">
+                        <summary class="tier_summary">
+                            <span>Tier 1</span>
+                            <span class="tier_count">({{ tier1_entries|length }})</span>
+                        </summary>
+
+                        <div class="password_cards"> 
+                            {% for entry in tier1_entries %}
+                            <div class="password_card">
+
+                                <div class="card_header">
+                                    <h3>{{ entry.site }}</h3>
+
+                                    <div class="card_actions"> <!-- displays the date the entry was created and a delete button -->
+                                        <span class="card_date">{{ entry.created_at }}</span>
+
+                                        <form class="delete_form" 
+                                            method="POST"
+                                            action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+                                            <button type="submit"
+                                                    class="delete_button"
+                                                    title="Delete"
+                                                    onclick="return confirm('Delete this entry?')">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="card_body">
+
+                                    <p class="field_row"> <!-- displays the username with a copy button -->
+                                        <strong>Username:</strong>
+                                        <span class="field_value">{{ entry.username }}</span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.username }}">
+                                            Copy
+                                        </button>
+                                        <button type="button"
+                                                class="edit_button"
+                                                data-id="{{ entry.id }}"
+                                                data-site="{{ entry.site }}"
+                                                data-username="{{ entry.username }}"
+                                                data-password="{{ entry.password }}"
+                                                data-notes="{{ entry.notes }}"
+                                                data-tier="low">
+                                            Edit
+                                        </button>
+                                    </p>
+
+                                    <p class="field_row"> <!-- displays the password with a button to show and hide and a copy button -->
+                                        <strong>Password:</strong>
+                                        <span class="password_text">••••••••</span>
+                                        <span class="real_password" style="display:none;">
+                                            {{ entry.password }}
+                                        </span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.password }}">
+                                            Copy
+                                        </button>
+                                        <button type="button" class="toggle_password">Show</button>
+                                    </p>
+
+                                    {% if entry.notes %}
+                                    <p>
+                                        <strong>Notes:</strong> {{ entry.notes }}
+                                    </p>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                            {% else %}
+                            <p class="empty_tier">No Tier 1 passwords yet.</p>
+                            {% endfor %}
+                        </div>
+
+                    </details>
+
+                    <!-- TIER 2 -->
+                    <details class="tier_group" id="tier2">
+                        <summary class="tier_summary">
+                            <span>Tier 2</span>
+                            <span class="tier_count">({{ tier2_entries|length }})</span>
+                        </summary>
+
+                        <div class="password_cards">
+                            {% for entry in tier2_entries %}
+                            <div class="password_card">
+
+                                <div class="card_header">
+                                    <h3>{{ entry.site }}</h3>
+
+                                    <div class="card_actions">
+                                        <span class="card_date">{{ entry.created_at }}</span>
+
+                                        <form class="delete_form"
+                                            method="POST"
+                                            action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+                                            <button type="submit"
+                                                    class="delete_button"
+                                                    title="Delete"
+                                                    onclick="return confirm('Delete this entry?')">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="card_body">
+
+                                    <p class="field_row">
+                                        <strong>Username:</strong>
+                                        <span class="field_value">{{ entry.username }}</span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.username }}">
+                                            Copy
+                                        </button>
+                                        <button type="button"
+                                                class="edit_button"
+                                                data-id="{{ entry.id }}"
+                                                data-site="{{ entry.site }}"
+                                                data-username="{{ entry.username }}"
+                                                data-password="{{ entry.password }}"
+                                                data-notes="{{ entry.notes }}"
+                                                data-tier="medium">
+                                            Edit
+                                        </button>
+                                    </p>
+
+                                    <p class="field_row">
+                                        <strong>Password:</strong>
+                                        <span class="password_text">••••••••</span>
+                                        <span class="real_password" style="display:none;">
+                                            {{ entry.password }}
+                                        </span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.password }}">
+                                            Copy
+                                        </button>
+                                        <button type="button" class="toggle_password">Show</button>
+                                    </p>
+
+                                    {% if entry.notes %}
+                                    <p>
+                                        <strong>Notes:</strong> {{ entry.notes }}
+                                    </p>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                            {% else %}
+                            <p class="empty_tier">No Tier 2 passwords yet.</p>
+                            {% endfor %}
+                        </div>
+                    </details>
+
+                    <!-- TIER 3 -->
+                    <details class="tier_group" id="tier3">
+                        <summary class="tier_summary">
+                            <span>Tier 3</span>
+                            <span class="tier_count">({{ tier3_entries|length }})</span>
+                        </summary>
+
+                        <div class="password_cards">
+                            {% for entry in tier3_entries %}
+                            <div class="password_card">
+
+                                <div class="card_header">
+                                    <h3>{{ entry.site }}</h3>
+
+                                    <div class="card_actions">
+                                        <span class="card_date">{{ entry.created_at }}</span>
+
+                                        <form class="delete_form"
+                                            method="POST"
+                                            action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+                                            <button type="submit"
+                                                    class="delete_button"
+                                                    title="Delete"
+                                                    onclick="return confirm('Delete this entry?')">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="card_body">
+                                    <p class="field_row">
+                                        <strong>Username:</strong>
+                                        <span class="field_value">{{ entry.username }}</span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.username }}">
+                                            Copy
+                                        </button>
+                                        <button type="button"
+                                                class="edit_button"
+                                                data-id="{{ entry.id }}"
+                                                data-site="{{ entry.site }}"
+                                                data-username="{{ entry.username }}"
+                                                data-password="{{ entry.password }}"
+                                                data-notes="{{ entry.notes }}"
+                                                data-tier="high">
+                                            Edit
+                                        </button>
+                                    </p>
+
+                                    <p class="field_row">
+                                        <strong>Password:</strong>
+                                        <span class="password_text">••••••••</span>
+                                        <span class="real_password" style="display:none;">
+                                            {{ entry.password }}
+                                        </span>
+                                        <button type="button"
+                                                class="copy_button"
+                                                data-copy="{{ entry.password }}">
+                                            Copy
+                                        </button>
+                                        <button type="button" class="toggle_password">Show</button>
+                                    </p>
+
+                                    {% if entry.notes %}
+                                    <p><strong>Notes:</strong> {{ entry.notes }}</p>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                            {% else %}
+                            <p class="empty_tier">No Tier 3 passwords yet.</p>
+                            {% endfor %}
+                        </div>
+
+                    </details>
+                    
+                </div> <!-- end tier_groups -->
+                
+                {% else %}
+                <div class="subtitle">No passwords yet. Add your first one above.</div>
+                {% endif %}
+
+                <!-- ===== VAULT — always visible, unlocks when Tier 1 is selected ===== -->
+                <div class="vault_wrapper" id="vaultWrapper">
+                    <!-- lock overlay — sits on top when locked -->
+                    <div class="vault_lock_overlay" id="vaultLockOverlay">
+                        <span class="vault_lock_icon">🔒</span>
+                        <span class="vault_lock_msg">Select Tier 3 to access the Vault</span>
                     </div>
 
-                    <!-- right side of box -->
-                    <div class="form_right"> 
-                        <div class="title">Choose a Password Tier</div>
+                    <div class="vault_section">
+                        <div class="vault_header">
+                            <span class="vault_title">🗄️ Vault</span>
+                            <span class="vault_subtitle">Files encrypted with Tier&nbsp;3 key</span>
+                            <button type="button" class="vault_upload_toggle" id="vaultUploadToggle">+ Add File</button>
+                        </div>
 
-                        <div class="radio_option">
-                            <input type="radio" id="tier_low" name="option" value="low" checked> 
-                            <label for ="tier_low">Tier 1</label>
+                        <!-- Upload form (hidden by default) -->
+                        <div class="vault_upload_form" id="vaultUploadForm" style="display:none;">
+                            <form method="POST" action="{{ url_for('vault_upload') }}" enctype="multipart/form-data">
+                                <div class="vault_form_row">
+                                    <label class="vault_file_label" for="vault_file_input">Choose file</label>
+                                    <input type="file" id="vault_file_input" name="vault_file" required
+                                        onchange="document.getElementById('vault_file_name').textContent = this.files[0]?.name || 'No file chosen'">
+                                    <span class="vault_file_chosen" id="vault_file_name">No file chosen</span>
+                                </div>
+                                <div class="vault_form_row">
+                                    <input type="text" name="vault_notes" placeholder="Notes (optional)" class="vault_notes_input" />
+                                </div>
+                                <div class="vault_form_row">
+                                    <input type="submit" value="Encrypt &amp; Upload" class="vault_submit" />
+                                    <button type="button" class="vault_cancel" id="vaultUploadCancel">Cancel</button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="radio_option">
-                            <input type="radio" id="tier_medium" name="option" value="medium"
-                                {{ 'disabled' if not two_fa_enabled else '' }}>
-                            <label for="tier_medium" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
-                                Tier 2 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
-                            </label>
-                        </div>
-                        <div class="radio_option">
-                            <input type="radio" id="tier_high" name="option" value="high"
-                                {{ 'disabled' if not two_fa_enabled else '' }}>
-                            <label for="tier_high" class="{{ 'tier_disabled_label' if not two_fa_enabled else '' }}">
-                                Tier 3 {% if not two_fa_enabled %}<span class="tier_lock_hint">🔒 2FA required</span>{% endif %}
-                            </label>
-                        </div>
-                    </div>      
-                </div>
-                <div class="form__field">
-                    <input type="submit" value="Add Password" />
-                </div>
-            </form>
 
-            <a href="/logout" class="logout">Logout</a>
-            <a href="/settings" class="settings">Settings</a>
+                        <!-- File list -->
+                        {% if vault_files %}
+                        <div class="vault_file_list">
+                            {% for vf in vault_files %}
+                            <div class="vault_file_card">
+                                <span class="vault_file_icon">{{ vf.filename | vault_icon }}</span>
+                                <div class="vault_file_info">
+                                    <span class="vault_file_name">{{ vf.filename }}</span>
+                                    {% if vf.notes %}
+                                    <span class="vault_file_notes">{{ vf.notes }}</span>
+                                    {% endif %}
+                                    <span class="vault_file_date">{{ vf.created_at }}</span>
+                                </div>
+                                <div class="vault_file_actions">
+                                    <a href="{{ url_for('vault_download', file_id=vf.id) }}"
+                                    class="vault_download_btn">⬇️ Download</a>
+                                    <form method="POST" action="{{ url_for('vault_delete', file_id=vf.id) }}"
+                                        style="display:inline;">
+                                        <button type="submit" class="delete_button" title="Delete"
+                                                onclick="return confirm('Permanently delete this vault file?')">🗑️</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="vault_empty">No files in vault yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- ===== END VAULT ===== -->
+
+                
+
+                
+            </div>
         </div>
     </div>
 
@@ -614,6 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
 </body>
 
 </html>
