@@ -8,13 +8,14 @@ Outputs: Rendered HTML pages for login, signup, and main page with password entr
 Resources: ChatGPT was used in the pywebview integration.
 '''
 import os
+from pyexpat.errors import messages
 import threading
 import time
 import io
 import csv
 
 import webview
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash,  get_flashed_messages
 from werkzeug.serving import make_server
 import mimetypes
 
@@ -369,6 +370,22 @@ def disable_2fa():
     
     return redirect(url_for("settings"))
 
+@app.route("/export-passwords", methods=["POST"])
+def export_passwords():
+    if "master_password" not in session:
+        return redirect(url_for("login"))
+    try:
+        csv_data = backend.export_passwords(DB_PATH, session["master_password"])
+        downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+        os.makedirs(downloads_dir, exist_ok=True)
+        dest = os.path.join(downloads_dir, "enclav3_export.csv")
+        with open(dest, "w", newline="", encoding="utf-8") as f:
+            f.write(csv_data)
+        return redirect(url_for("settings", export_status="export_success"))
+    except Exception as exc:
+        app.logger.error("Export failed: %s", exc)
+        return redirect(url_for("settings", export_status="export_failed"))
+    
 # ---------------------------------------------------------------------------
 # Vault routes – only accessible when 2FA is enabled (same gate as Tier 3)
 # ---------------------------------------------------------------------------
@@ -560,8 +577,9 @@ def settings():
     two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
     pin_enabled = backend.is_pin_enabled(DB_PATH)
     challenge_enabled = backend.is_challenge_enabled(DB_PATH)
+    export_status = request.args.get("export_status")
     return render_template("settings.html", two_fa_enabled=two_fa_enabled,
-                           pin_enabled=pin_enabled, challenge_enabled=challenge_enabled)
+                           pin_enabled=pin_enabled, challenge_enabled=challenge_enabled, export_status=export_status)
 
 if __name__ == "__main__":
     _run_desktop()

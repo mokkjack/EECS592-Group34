@@ -22,6 +22,8 @@ import pyotp
 import qrcode
 from io import BytesIO
 from cryptography.fernet import Fernet, InvalidToken
+import csv
+import io
 
 
 def _get_default_db_path() -> str: #Helper function to get the default path for the database
@@ -465,6 +467,28 @@ def edit_entry(db_path: str, master_password: str, entry_id: int, site: Optional
 		if cur.rowcount == 0:
 			print("Entry not found.")
 
+def export_passwords(db_path: str, master_password: str) -> str:
+    """Export all password entries to a CSV string."""
+    entries = list_entries(db_path, master_password)
+    
+    output = io.StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=["name", "url", "username", "password", "note"],
+        extrasaction="ignore"
+    )
+    writer.writeheader()
+    
+    for e in entries:
+        writer.writerow({
+            "name":     e["site"],
+            "url":      e["site"],
+            "username": e["username"],
+            "password": e["password"],
+            "note":     e["notes"],
+        })
+    
+    return output.getvalue()
 
 # ---------------------------------------------------------------------------
 # Vault file functions – files are always encrypted at the "high" (Tier 3)

@@ -120,6 +120,25 @@
                 </div>
             </form>
         </details>
+        
+        <!-- Export Password Section-->
+        <details class="settings_group" {% if export_status %}open{% endif %}>
+            <summary class="settings_summary">⬇️ Export Passwords</summary>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0.5rem 0;">
+                Export all your passwords to a CSV file.
+            </p>
+            {% if export_status == "export_success" %}
+                <div class="settings_flash">Passwords exported to your Downloads folder.</div>
+            {% elif export_status == "export_failed" %}
+                <div class="settings_flash" style="border-color:#ff9aa2;color:#ff9aa2;">Failed to export passwords.</div>
+            {% endif %}
+            <form method="POST" action="/export-passwords">
+                <div class="form__field">
+                    <input type="submit" value="Export Passwords"
+                        style="background:linear-gradient(160deg,#8ceabb,#378f7b);margin-top:0.25rem;" />
+                </div>
+            </form>
+        </details>
 
         <!-- Delete Account Section -->
         <details class="settings_group">
