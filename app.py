@@ -15,7 +15,7 @@ import io
 import csv
 
 import webview
-from flask import Flask, render_template, request, redirect, url_for, session, flash,  get_flashed_messages
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.serving import make_server
 import mimetypes
 
