@@ -40,19 +40,86 @@ def _vault_icon(filename: str) -> str:
 
 app.jinja_env.filters["vault_icon"] = _vault_icon
 
-DB_PATH = backend.DEFAULT_DB
+# Helper function to get the users directory
+def _get_users_dir() -> str:
+    base_dir = os.getenv("LOCALAPPDATA") or os.getenv("APPDATA") or os.path.dirname(__file__)
+    app_dir = os.path.join(base_dir, "Enclav3")
+    users_dir = os.path.join(app_dir, "users")
+    os.makedirs(users_dir, exist_ok=True)
+    return users_dir
 
-# ---------------------------------------------------------------------------
-# Ensure the vault_files table exists even on databases created before the
-# vault feature was added.
-# ---------------------------------------------------------------------------
+# Helper function to get database path for a user
+def _get_user_db_path(username: str) -> str:
+    return os.path.join(_get_users_dir(), f"{username}.db")
+
+# Helper function to list all available users
+def _list_users() -> list[str]:
+    users_dir = _get_users_dir()
+    users = []
+    for filename in os.listdir(users_dir):
+        if filename.endswith(".db"):
+            users.append(filename[:-3])  # Remove .db extension
+    return sorted(users)
+
+# Helper function to get the current user's database path from session
+def _get_session_db_path() -> str:
+    if "user_db_path" not in session:
+        return None
+    return session["user_db_path"]
+
+DB_PATH = backend.DEFAULT_DB  # Keep for backward compatibility------------------------------------------
 try:
     backend.migrate_add_vault_table(DB_PATH)
 except Exception:
     pass  # DB may not exist yet (first run); init_db will create the table.
 
-@app.route("/", methods=["GET", "POST"]) # Login page
+@app.route("/", methods=["GET", "POST"]) # User selection page
+def index():
+    """Main entry point - either show user selection or redirect to login"""
+    users = _list_users()
+    
+    if not users:
+        # No users exist yet, redirect to create first user
+        return redirect(url_for("create_user"))
+    
+    if request.method == "POST":
+        selected_user = request.form.get("user", "").strip()
+        if selected_user in users:
+            # Store the selected user and their database path in session
+            session["username"] = selected_user
+            session["user_db_path"] = _get_user_db_path(selected_user)
+            return redirect(url_for("login"))
+        else:
+            flash("Invalid user selected.")
+    
+    return render_template("select_user.html", users=users)
+
+@app.route("/create-user", methods=["GET", "POST"])
+def create_user():
+    """Create a new user"""
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        if not username:
+            error = "Username is required."
+        elif username in _list_users():
+            error = "This user already exists."
+        elif not all(c.isalnum() or c in "_-" for c in username):
+            error = "Username can only contain letters, numbers, underscores, and hyphens."
+        else:
+            # Store the new user in session and prepare for signup
+            session["username"] = username
+            session["user_db_path"] = _get_user_db_path(username)
+            return redirect(url_for("signup"))
+    
+    return render_template("create_user.html", error=error)
+
+@app.route("/login", methods=["GET", "POST"]) # Login page
 def login(): #Login page handler
+    # Ensure user is selected
+    if "username" not in session or "user_db_path" not in session:
+        return redirect(url_for("index"))
+    db_path = session["user_db_path"]
     error = None
     if request.method == "POST": #If it's a POST request, we need to verify the master password
         master_password = request.form.get("master_password", "").strip() #Get the master password from the form and strip whitespace
@@ -60,11 +127,11 @@ def login(): #Login page handler
             error = "Master password is required." #Set the error message to "Master password is required."
         else: #otherwise
             try: #verify the master password using the backend function
-                backend.verify_master_password(DB_PATH, master_password)
+                backend.verify_master_password(db_path, master_password)
             except RuntimeError as exc: #Raise an error if the master password is incorrect
                 error = str(exc)
             else: #If the master password is correct, check if 2FA is enabled
-                if backend.is_2fa_enabled(DB_PATH):
+                if backend.is_2fa_enabled(db_path):
                     # 2FA is enabled, redirect to 2FA verification page
                     session["master_password_temp"] = master_password
                     return redirect(url_for("verify_2fa"))
@@ -72,16 +139,18 @@ def login(): #Login page handler
                     # 2FA is not enabled, login directly
                     session["master_password"] = master_password
                     return redirect(url_for("main"))
-    return render_template("login.html", error=error) #Render the login page with any error messages
+    username = session.get("username", "Unknown")
+    return render_template("login.html", error=error, username=username) #Render the login page with any error messages
 
 @app.route("/main") #Main page handler
 def main(): #If the master password is not in the session, redirect to the login page
-    if "master_password" not in session: #If the master password is not in the session, redirect to the login page
+    db_path = _get_session_db_path()
+    if "master_password" not in session or db_path is None: #If the master password is not in the session, redirect to the login page
         return redirect(url_for("login")) #Redirect to the login page
 
     try: #Get all passwords
         sort = request.args.get("sort", "alpha")
-        entries = backend.list_entries(DB_PATH, session["master_password"], sort)
+        entries = backend.list_entries(db_path, session["master_password"], sort)
         
     except RuntimeError as exc: #Error handling
         flash(str(exc))
@@ -93,12 +162,12 @@ def main(): #If the master password is not in the session, redirect to the login
     tier3_entries = [e for e in entries if e.get("tier") == "high"]
         
     # Check if 2FA is enabled for viewing tier 2 and 3 entries
-    two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
+    two_fa_enabled = backend.is_2fa_enabled(db_path)
     vault_files = []
     if two_fa_enabled:
         try:
-            backend.migrate_add_vault_table(DB_PATH)
-            vault_files = backend.list_vault_files(DB_PATH, session["master_password"])
+            backend.migrate_add_vault_table(db_path)
+            vault_files = backend.list_vault_files(db_path, session["master_password"])
             print(f"[vault] loaded {len(vault_files)} file(s)")
         except Exception as exc:
             print(f"[vault] ERROR loading files: {exc}")
@@ -118,6 +187,13 @@ def main(): #If the master password is not in the session, redirect to the login
                            sort=sort) #Render the main page with the decrypted entries
 @app.route("/signup", methods=["GET", "POST"]) #Signup page handler
 def signup(): #Signing up for a new master password
+    # Ensure user is selected
+    if "username" not in session or "user_db_path" not in session:
+        return redirect(url_for("index"))
+    
+    db_path = session["user_db_path"]
+    username = session.get("username", "Unknown")
+    
     error = None
     if request.method == "POST": #If it's a POST request, we need to create a new master password
         master_password = request.form.get("master_password", "").strip() #Get the master password from the form and strip whitespace
@@ -128,20 +204,21 @@ def signup(): #Signing up for a new master password
             error = "Passwords do not match." #Error handling
         else: #If the master password is valid and matches the confirmation, try to initialize the database with the new master password
             try: #Initialize the database with the new master password using the backend function
-                backend.init_db(DB_PATH, master_password)
+                backend.init_db(db_path, master_password)
             except RuntimeError as exc: #Raise an error if the database already exists or if there was an issue creating it
                 error = str(exc)
             else: #If the database was successfully initialized, store the master password in the session and redirect to the main page
                 session["master_password"] = master_password #Store the master password in the session
                 flash("Master password created.") #Flash a message indicating that the master password was created
                 return redirect(url_for("main")) #Redirect to the main page
-    return render_template("signup.html", error=error) #Render the signup page with any error messages
+    return render_template("signup.html", error=error, username=username) #Render the signup page with any error messages
 
 
 @app.route("/add-entry", methods=["POST"])
 def add_entry(): #Add password entry handler
     master_password = session.get("master_password") #Get the master password from the session
-    if not master_password: #If the master password is not in the session, redirect to the login page
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None: #If the master password is not in the session, redirect to the login page
         return redirect(url_for("login"))
 
     site = request.form.get("site", "").strip() #Get the site from the form and strip whitespace
@@ -155,7 +232,7 @@ def add_entry(): #Add password entry handler
         return redirect(url_for("main"))
 
     try: #Try to add the new entry using the backend function, encrypting it with the master password from the session
-        backend.add_entry(DB_PATH, Entry(site=site, username=username, password=password, notes=notes, tier=tier), master_password)
+        backend.add_entry(db_path, Entry(site=site, username=username, password=password, notes=notes, tier=tier), master_password)
     except RuntimeError as exc:
         flash(str(exc))
     else:
@@ -166,11 +243,12 @@ def add_entry(): #Add password entry handler
 
 @app.route("/delete-entry/<int:entry_id>", methods=["POST"])
 def delete_entry(entry_id: int): #Delete password entry handler
-    master_password = session.get("master_password") 
-    if not master_password:
+    master_password = session.get("master_password")
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None:
         return redirect(url_for("login"))
     try:
-        backend.delete_entry(DB_PATH, master_password, entry_id) #Try to delete the entry with the given ID using the backend function
+        backend.delete_entry(db_path, master_password, entry_id) #Try to delete the entry with the given ID using the backend function
     except RuntimeError as exc:
         flash(str(exc))
     else:
@@ -181,7 +259,8 @@ def delete_entry(entry_id: int): #Delete password entry handler
 @app.route("/edit-entry/<int:entry_id>", methods=["POST"])
 def edit_entry(entry_id: int): #edit password entry handler
     master_password = session.get("master_password")
-    if not master_password: #if the master password is not in the session, redirect to the login page
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None: #if the master password is not in the session, redirect to the login page
         return redirect(url_for("login"))
     site = request.form.get("site", "").strip() #get the site from the form and strip whitespace
     username = request.form.get("username", "").strip() #get the username from the form and strip whitespace
@@ -196,7 +275,7 @@ def edit_entry(entry_id: int): #edit password entry handler
 
     #try to edit the entry with the given ID
     try:
-        backend.edit_entry(DB_PATH, master_password, entry_id, site, username, password, notes, tier)
+        backend.edit_entry(db_path, master_password, entry_id, site, username, password, notes, tier)
     except RuntimeError as exc:
         flash(str(exc))
     else:
@@ -207,6 +286,10 @@ def edit_entry(entry_id: int): #edit password entry handler
 @app.route("/setup-pin", methods=["POST"])
 def setup_pin():
     if "master_password" not in session:
+        return redirect(url_for("login"))
+    
+    db_path = _get_session_db_path()
+    if db_path is None:
         return redirect(url_for("login"))
     
     pin = request.form.get("pin", "").strip() # get the PIN from the form and strip whitespace
@@ -222,7 +305,7 @@ def setup_pin():
     
     # save the PIN using the backend function, which hashes it before storing
     try:
-        backend.update_security_settings(DB_PATH, session["master_password"], pin=pin)
+        backend.update_security_settings(db_path, session["master_password"], pin=pin)
         flash("PIN set up successfully.")
     except RuntimeError as exc:
         flash(str(exc))
@@ -235,6 +318,10 @@ def setup_challenge():
     if "master_password" not in session:
         return redirect(url_for("login"))
     
+    db_path = _get_session_db_path()
+    if db_path is None:
+        return redirect(url_for("login"))
+    
     question = request.form.get("challenge_question", "").strip()
     answer = request.form.get("challenge_answer", "").strip()
     
@@ -244,7 +331,7 @@ def setup_challenge():
     
     # save the question and hashed answer using the backend function
     try:
-        backend.update_security_settings(DB_PATH, session["master_password"], 
+        backend.update_security_settings(db_path, session["master_password"], 
                                          challenge_question=question, 
                                          challenge_answer=answer)
         flash("Challenge question set up successfully.")
@@ -256,40 +343,54 @@ def setup_challenge():
 @app.route("/logout")
 def logout(): #Logout handler
     session.pop("master_password", None)
-    return redirect(url_for("login"))
+    session.pop("master_password_temp", None)
+    return redirect(url_for("index"))
+
+@app.route("/switch-user")
+def switch_user(): #Switch user handler
+    session.clear()
+    return redirect(url_for("index"))
 
 @app.route("/delete-account", methods=["POST"])
 def delete_account():
-    """Permanently delete the database and log the user out."""
+    """Permanently delete the user's database and log out."""
     if "master_password" not in session:
         return redirect(url_for("login"))
+    
+    db_path = _get_session_db_path()
+    username = session.get("username")
+    
     session.clear()
     import gc, sqlite3 as _sqlite3
     # Force garbage collection to close any lingering connection objects
     gc.collect()
     try:
-        if os.path.exists(DB_PATH):
+        if db_path and os.path.exists(db_path):
             # Checkpoint WAL so no sidecar holds data, then close cleanly
             try:
-                _conn = _sqlite3.connect(DB_PATH)
+                _conn = _sqlite3.connect(db_path)
                 _conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                 _conn.close()
             except Exception:
                 pass
-            os.remove(DB_PATH)
+            os.remove(db_path)
             # Remove WAL / SHM sidecar files if present
             for _suffix in ("-wal", "-shm"):
-                _sidecar = DB_PATH + _suffix
+                _sidecar = db_path + _suffix
                 if os.path.exists(_sidecar):
                     os.remove(_sidecar)
     except OSError:
         pass
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 @app.route("/verify-2fa", methods=["GET", "POST"])
 def verify_2fa():
     """Verify 2FA token during login"""
     if "master_password_temp" not in session:
+        return redirect(url_for("login"))
+    
+    db_path = _get_session_db_path()
+    if db_path is None:
         return redirect(url_for("login"))
     
     error = None
@@ -298,7 +399,7 @@ def verify_2fa():
         if not totp_code:
             error = "2FA code is required."
         else:
-            secret = backend.get_2fa_secret(DB_PATH)
+            secret = backend.get_2fa_secret(db_path)
             if backend.verify_totp(secret, totp_code):
                 # Verification successful, set the master password in session
                 session["master_password"] = session.pop("master_password_temp")
@@ -329,6 +430,10 @@ def confirm_2fa_setup():
     if "master_password" not in session:
         return redirect(url_for("login"))
     
+    db_path = _get_session_db_path()
+    if db_path is None:
+        return redirect(url_for("login"))
+    
     if "2fa_secret_temp" not in session:
         flash("2FA setup not initiated.")
         return redirect(url_for("settings"))
@@ -344,7 +449,7 @@ def confirm_2fa_setup():
             if backend.verify_totp(secret, totp_code):
                 # Verification successful, enable 2FA
                 try:
-                    backend.enable_2fa(DB_PATH, session["master_password"], secret)
+                    backend.enable_2fa(db_path, session["master_password"], secret)
                     session.pop("2fa_secret_temp", None)
                     flash("2FA has been successfully enabled!")
                     return redirect(url_for("settings"))
@@ -362,8 +467,12 @@ def disable_2fa():
     if "master_password" not in session:
         return redirect(url_for("login"))
     
+    db_path = _get_session_db_path()
+    if db_path is None:
+        return redirect(url_for("login"))
+    
     try:
-        backend.disable_2fa(DB_PATH, session["master_password"])
+        backend.disable_2fa(db_path, session["master_password"])
         flash("2FA has been disabled.")
     except Exception as exc:
         flash(f"Failed to disable 2FA: {str(exc)}")
@@ -374,8 +483,13 @@ def disable_2fa():
 def export_passwords():
     if "master_password" not in session:
         return redirect(url_for("login"))
+    
+    db_path = _get_session_db_path()
+    if db_path is None:
+        return redirect(url_for("login"))
+    
     try:
-        csv_data = backend.export_passwords(DB_PATH, session["master_password"])
+        csv_data = backend.export_passwords(db_path, session["master_password"])
         downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
         os.makedirs(downloads_dir, exist_ok=True)
         dest = os.path.join(downloads_dir, "enclav3_export.csv")
@@ -410,9 +524,10 @@ def _allowed_file(filename: str) -> bool:
 def vault_upload():
     """Upload and encrypt a file into the Tier-3 vault."""
     master_password = session.get("master_password")
-    if not master_password:
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None:
         return redirect(url_for("login"))
-    if not backend.is_2fa_enabled(DB_PATH):
+    if not backend.is_2fa_enabled(db_path):
         flash("Vault requires 2FA to be enabled.")
         return redirect(url_for("main"))
 
@@ -431,7 +546,7 @@ def vault_upload():
     mime_type = file.content_type or mimetypes.guess_type(filename)[0] or "application/octet-stream"
 
     try:
-        backend.add_vault_file(DB_PATH, master_password, filename, mime_type, file_bytes, notes)
+        backend.add_vault_file(db_path, master_password, filename, mime_type, file_bytes, notes)
         print(f"[vault] saved '{filename}' ({len(file_bytes)} bytes)")
         flash(f"'{filename}' added to vault.")
     except Exception as exc:
@@ -445,14 +560,15 @@ def vault_upload():
 def vault_download(file_id: int):
     """Decrypt and save a vault file to the user's Downloads folder."""
     master_password = session.get("master_password")
-    if not master_password:
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None:
         return redirect(url_for("login"))
-    if not backend.is_2fa_enabled(DB_PATH):
+    if not backend.is_2fa_enabled(db_path):
         flash("Vault requires 2FA to be enabled.")
         return redirect(url_for("main"))
 
     try:
-        vault_file = backend.get_vault_file(DB_PATH, master_password, file_id)
+        vault_file = backend.get_vault_file(db_path, master_password, file_id)
     except RuntimeError as exc:
         flash(str(exc))
         return redirect(url_for("main"))
@@ -481,14 +597,15 @@ def vault_download(file_id: int):
 def vault_delete(file_id: int):
     """Delete a vault file."""
     master_password = session.get("master_password")
-    if not master_password:
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None:
         return redirect(url_for("login"))
-    if not backend.is_2fa_enabled(DB_PATH):
+    if not backend.is_2fa_enabled(db_path):
         flash("Vault requires 2FA to be enabled.")
         return redirect(url_for("main"))
 
     try:
-        backend.delete_vault_file(DB_PATH, master_password, file_id)
+        backend.delete_vault_file(db_path, master_password, file_id)
         flash("Vault file deleted.")
     except RuntimeError as exc:
         flash(str(exc))
@@ -500,7 +617,8 @@ def vault_delete(file_id: int):
 def import_passwords():
     """Import passwords from CSV file with headers name,url,username,password,note."""
     master_password = session.get("master_password")
-    if not master_password:
+    db_path = _get_session_db_path()
+    if not master_password or db_path is None:
         return redirect(url_for("login"))
 
     file = request.files.get("password_file")
@@ -545,7 +663,7 @@ def import_passwords():
             site = url
 
         try:
-            backend.add_entry(DB_PATH, Entry(site=site, username=username, password=password, notes=notes), master_password)
+            backend.add_entry(db_path, Entry(site=site, username=username, password=password, notes=notes), master_password)
             imported += 1
         except Exception as exc:
             skipped += 1
@@ -574,9 +692,12 @@ def _run_desktop() -> None: #Create a function to run the desktop application us
 def settings():
     if "master_password" not in session:
         return redirect(url_for("login"))
-    two_fa_enabled = backend.is_2fa_enabled(DB_PATH)
-    pin_enabled = backend.is_pin_enabled(DB_PATH)
-    challenge_enabled = backend.is_challenge_enabled(DB_PATH)
+    db_path = _get_session_db_path()
+    if db_path is None:
+        return redirect(url_for("login"))
+    two_fa_enabled = backend.is_2fa_enabled(db_path)
+    pin_enabled = backend.is_pin_enabled(db_path)
+    challenge_enabled = backend.is_challenge_enabled(db_path)
     export_status = request.args.get("export_status")
     return render_template("settings.html", two_fa_enabled=two_fa_enabled,
                            pin_enabled=pin_enabled, challenge_enabled=challenge_enabled, export_status=export_status)

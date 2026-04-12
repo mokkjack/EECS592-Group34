@@ -1,0 +1,90 @@
+<!--
+Name: select_user.html
+Description: This file contains the HTML template for user selection.
+Users can select an existing user or create a new one.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Enclav3 - Select User</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+<script>
+  (function() {
+    var t = localStorage.getItem('enclav3_theme') || 'dark';
+    var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
+    var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent-dark', ad);
+  })();
+</script>
+<style>
+  .user-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+  .user-list li {
+    margin: 10px 0;
+  }
+  .user-list button {
+    width: 100%;
+    padding: 12px;
+    text-align: left;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+  }
+  .user-list button:hover {
+    background: var(--accent-dark);
+  }
+  .divider {
+    text-align: center;
+    margin: 20px 0;
+    color: #666;
+  }
+</style>
+</head>
+
+<body class="align">
+
+  <div class="grid">
+    <div class="register">
+
+      <div class="brand">Enclav3</div>
+      <div class="subtitle">Select a user</div>
+
+      {% if users %}
+        <form method="POST">
+          <ul class="user-list">
+            {% for user in users %}
+              <li>
+                <button type="submit" name="user" value="{{ user }}">
+                  👤 {{ user }}
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        </form>
+        <div class="divider">or</div>
+      {% endif %}
+
+      <div class="form__field">
+        <a href="/create-user" style="text-decoration: none;">
+          <button type="button" style="width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+            ➕ Create New User
+          </button>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

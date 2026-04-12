@@ -31,7 +31,8 @@ Outputs: Rendered HTML page for signup, redirect back to login page on successfu
 		<div class="register">
 
 			<div class="brand">Enclav3</div>
-			<div class="subtitle">Create your master password</div>
+			<div class="subtitle">User: <strong>{{ username }}</strong></div>
+			<div class="subtitle" style="font-size: 14px; margin-bottom: 10px;">Create your master password</div>
 
 			<form class="form" method="POST" action="/signup">
 				<div class="form__field">
@@ -59,7 +60,7 @@ Outputs: Rendered HTML page for signup, redirect back to login page on successfu
 				<div class="error">{{ error }}</div>
 			{% endif %}
 
-			<a href="/" class="secondary">Back to login</a>
+			<a href="/switch-user" class="secondary">Back to user selection</a>
 
 		</div>
 	</div>

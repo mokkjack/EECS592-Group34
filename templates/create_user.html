@@ -1,16 +1,12 @@
 <!--
-Name: login.html
-Authors: Jack Morice, Nick Greico, Alex Carrillo, Gunther Luechtefield
-Description: This file contains the HTML template for the login page of the Enclav3 application.
-It defines the structure and layout of the login page, including a form for entering the master password.
-Inputs: Master password
-Outputs: Rendered HTML page for login, redirect to main page on successful login, and error message if password is incorrect
+Name: create_user.html
+Description: This file contains the HTML template for creating a new user.
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Enclav3 Master Login</title>
+<title>Enclav3 - Create User</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 <script>
@@ -31,11 +27,11 @@ Outputs: Rendered HTML page for login, redirect to main page on successful login
     <div class="register">
 
       <div class="brand">Enclav3</div>
-      <div class="subtitle">User: <strong>{{ username }}</strong></div>
+      <div class="subtitle">Create a new user</div>
 
-      <form class="form" method="POST" action="/login">
+      <form class="form" method="POST" action="/create-user">
         <div class="form__field">
-          <input type="password" name="master_password" placeholder="Master password" required />
+          <input type="text" name="username" placeholder="Username" required />
         </div>
 
         {% if error %}
@@ -43,10 +39,11 @@ Outputs: Rendered HTML page for login, redirect to main page on successful login
         {% endif %}
 
         <div class="form__field">
-          <input type="submit" value="Unlock" />
+          <input type="submit" value="Create User" />
         </div>
       </form>
-      <a href="/switch-user" class="secondary" style="margin-top: 10px; display: block;">Switch user</a>
+
+      <a href="/" class="secondary">Back to user selection</a>
 
     </div>
   </div>
