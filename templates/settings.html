@@ -104,6 +104,16 @@
             </div>
         </details>
 
+        <details class="settings_group"> 
+            <summary class="settings_summary">🔡 Adjust Text </summary>
+            <p style="color:var(--text-secondary);font-size:13px;margin:0.75rem 0 0.5rem;">Text Size</p>
+            <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+                <button class="theme_btn" id="btn_small" onclick="setTextSize('12px')">Small</button>
+                <button class="theme_btn" id="btn_medium" onclick="setTextSize('16px')">Medium</button>
+                <button class="theme_btn" id="btn_large" onclick="setTextSize('20px')">Large</button>
+            </div>
+        </details>
+
         <!-- Import Passwords Section -->
         <details class="settings_group">
             <summary class="settings_summary">⬆️ Import Passwords</summary>
@@ -213,13 +223,24 @@
             if (s.style.background === color) s.classList.add('active');
         });
     }
+    function setTextSize(size) {                                                         
+        document.documentElement.style.setProperty('--text-size', size);                
+        localStorage.setItem('enclav3_text_size', size);                                
+        var map = { '12px': 'btn_small', '16px': 'btn_medium', '20px': 'btn_large' };  
+        ['btn_small', 'btn_medium', 'btn_large'].forEach(function(id) {                 
+        document.getElementById(id).classList.remove('active');                      
+        });                                                                              
+        if (map[size]) document.getElementById(map[size]).classList.add('active');
+    }  
     // apply saved theme/accent on page load
     (function() {
         var t = localStorage.getItem('enclav3_theme') || 'dark';
         var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
         var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+        var ts = localStorage.getItem('enclav3_text_size') || '16px'; 
         setTheme(t);
         setAccent(a, ad);
+        setTextSize(ts);
     })();
     </script>
     <a href="/main" class="main">Back to Account</a>

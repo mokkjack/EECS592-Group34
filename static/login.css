@@ -57,7 +57,7 @@ html, body {
   color: var(--text-primary);
   text-align: center;
   outline: none;
-  font-size: 14px;
+  font-size: var(--text-size, 14px);
 }
 
 .secondary:hover {
@@ -84,7 +84,7 @@ input {
   color: var(--text-primary);
   text-align: center;
   outline: none;
-  font-size: 14px;
+  font-size: var(--text-size, 14px);
 }
 
 input::placeholder {
@@ -113,6 +113,7 @@ p {
 
 /* Themes and Accent Customization */
 :root {
+  --text-size:      16px; 
   --bg-primary:     #354152;
   --bg-card:        rgba(255,255,255,0.04);
   --bg-card-mid:    rgba(255,255,255,0.08);

@@ -18,9 +18,11 @@ Outputs: Rendered HTML page for signup, redirect back to login page on successfu
     var t = localStorage.getItem('enclav3_theme') || 'dark';
     var a = localStorage.getItem('enclav3_accent') || '#8ceabb';
     var ad = localStorage.getItem('enclav3_accent_dark') || '#378f7b';
+    var ts = localStorage.getItem('enclav3_text_size') || '16px'; 
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.style.setProperty('--accent', a);
     document.documentElement.style.setProperty('--accent-dark', ad);
+    document.documentElement.style.setProperty('--text-size', ts); 
   })();
 </script>
 </head>
