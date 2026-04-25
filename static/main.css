@@ -79,7 +79,7 @@ html, body {
   border: 1px solid var(--border-color);
   background: transparent;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -183,7 +183,7 @@ html, body {
   color: var(--text-primary);
   text-align: center;
   outline: none;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .logout:hover {
@@ -255,13 +255,13 @@ html, body {
 }
 
 .card_date {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
 }
 
 .card_body p {
   margin: 0.4rem 0;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-primary);
 }
 
@@ -275,7 +275,7 @@ html, body {
   background: transparent;
   color: var(--accent);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
   transition: all 0.2s ease;
 }
 
@@ -299,7 +299,7 @@ input {
   color: var(--text-primary);
   text-align: center;
   outline: none;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 input::placeholder {
@@ -331,7 +331,7 @@ input[type="submit"]:hover {
   background: transparent;
   color: var(--accent);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .copy_button:hover {
@@ -365,7 +365,7 @@ p {
     border: 1px solid var(--border-color);
     background: transparent;
     color: var(--accent);
-    font-size: 12px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -382,14 +382,14 @@ p {
 }
 
 .tier_count {
-    font-size: 12px;
+    font-size: 16px;
     color: var(--text-primary);
     margin-left: 0.5rem;
 }
 
 .tier_summary::after {
     content: "▾";             /* down arrow by default */
-    font-size: 12px;
+    font-size: 16px;
     margin-left: 0.5rem;      /* spacing from text */
     transition: transform 0.2s ease; /* smooth rotation */
 }
@@ -409,7 +409,7 @@ p {
   background: transparent;
   color: var(--accent);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
   transition: all 0.2s ease;
 }
 
@@ -509,7 +509,7 @@ p {
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   align-self: center;
   transition: all 0.2s ease;
   margin-top: 0.25rem;
@@ -596,7 +596,7 @@ p {
 }
 
 .vault_subtitle {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
   flex: 1;
 }
@@ -607,7 +607,7 @@ p {
   border: 1px solid var(--border-color);
   background: transparent;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -655,7 +655,7 @@ input[type="file"] {
 }
 
 .vault_file_chosen {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
 }
 
@@ -751,7 +751,7 @@ input[type="file"] {
 }
 
 .vault_file_notes {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
 }
 
@@ -773,7 +773,7 @@ input[type="file"] {
   border: 1px solid var(--border-color);
   background: transparent;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
